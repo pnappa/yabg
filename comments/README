@@ -1,0 +1,4 @@
+this is a folder that will contain the server and database required for taking in (and spitting out) comments
+note that the comments are stored in the sqlite database, with each article having an.
+perhaps that UUID will be a hash of the title? isn't too crazy of an idea... currently its an INTEGER type though
+
