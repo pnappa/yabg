@@ -36,9 +36,17 @@ import sqlite3
 import tornado.web
 from urllib.parse import urlparse
 import tornado.ioloop
+import json
+
+
+# token gen & presentation
+import base64
+from Crypto import Random
 
 # domain required for origin/referer check
 expected_hostname = "localhost"
+
+sql_con = sqlite3.connect("cooldb.db")
 
 # check if the request to our endpoints is not malicious, basically:
 # https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
@@ -48,7 +56,7 @@ def check_csrf(func):
 
         def fail(self):
             self.set_status(400)
-            self.write({"error": "csrf"})
+            self.write({"error": "csrf, please ensure Origin/Referer headers are set correctly & you are making a request with XMLHTTPRequest"})
             self.finish()
             return None
 
@@ -70,19 +78,71 @@ def check_csrf(func):
 
     return wrapper
 
+# TODO: replace with something hard
+def get_challenge(challenge_type):
+    """
+    @param: challenge_type
+        one of text, ansi
+    @return: hint,answers tuple
+        hint should contain the type, and what the client should display
+
+        hint= {
+            "hint_type": "text",
+            "display_data": "what is the value of 5+two?"
+        }
+    """
+    if challenge_type == "text":
+        return {"hint_type": "text", "display_data": "what is the value of 5+two?"}, { "answers": ["7", "seven"] }
+
+def store_captcha_id(captcha_id, thread_id):
+    with sql_con:
+        sql_con.execute("INSERT INTO tokenmapping(captcha_id, thread_id) VALUES(?, ?)", (captcha_id, thread_id))
+
+def store_challenge(captcha_id, hint, answers):
+    hint_str = json.dumps(hint)
+    answers_str = json.dumps(answers)
+
+    with sql_con:
+        sql_con.execute("INSERT INTO challenges(captcha_id, answer, hint) VALUES(?, ?, ?)", (captcha_id, answers_str, hint_str))
+
 class RequestCaptcha(tornado.web.RequestHandler):
     @check_csrf
     # return a UUID, and captcha data, to allow posting for <thread> comments
-    def get(self, threadid):
+    def post(self, thread_id):
         print(self.request.headers)
-        self.set_status(500)
-        self.write({"error": "unimplemented"})
+        # TODO: check IP for throttling
+        # TODO: check thread id exists (no need to? store_captcha_id will throw if it doesn't exist?)
+        # ^ i mean, that feels a bit hacky
+
+        # id to uniquely identify captcha request
+        captcha_id = Random.get_random_bytes(32)
+        # the thread this captcha token will apply to
+        thread_id = int(thread_id)
+        try:
+            store_captcha_id(captcha_id, thread_id)
+        except sqlite3.IntegrityError as e:
+            print(e)
+            self.set_status(400)
+            self.write({"error": "invalid thread id"})
+            self.finish()
+            return
+        
+        # get captcha challenge and store it
+        hint, answers = get_challenge('text')
+        store_challenge(captcha_id, hint, answers)
+        
+        # serialise id into transportable str
+        b64_str = base64.b64encode(captcha_id).decode('utf-8')
+        self.set_header("X-Captcha-ID", b64_str)
+
+        self.write(hint)
         self.finish()
 
 class HandleCaptcha(tornado.web.RequestHandler):
     # check stuff, and return crypographic captcha token if valid
     @check_csrf
     def post(self, threadid, captchaid):
+        # XXX: captchaid should be part of header?
         self.set_status(500)
         self.write({"error": "unimplemented"})
         self.finish()
@@ -105,6 +165,7 @@ class MessageHandler(tornado.web.RequestHandler):
 
 def make_app():
     return tornado.web.Application([
+        # it is mandatory that requests to these are made via JS queries
         (r"/captcha/(.+)/", RequestCaptcha),
         (r"/captcha/(.+)/(.+)/attempt/", HandleCaptcha),
         (r"/comments/(.+)/", MessageHandler)
@@ -113,6 +174,9 @@ def make_app():
         ])
 
 if __name__ == "__main__":
+    # need to do this to enforce foreign keys
+    sql_con.execute("PRAGMA foreign_keys = ON")
+
     app = make_app()
     app.listen(10001, address="127.0.0.1")
     tornado.ioloop.IOLoop.current().start()
