@@ -9,6 +9,16 @@ Yes, it's yet another blog generator.
 
 Yeah, it's a real work in progress.
 
+## Running it
+You'll need Python 3.6 (I use `secrets`), and probably not Python 3.7 (some of `hmac` is deprecated then).
+
+In the git directory:
+```
+~/.local/build/Python-3.6.7rc1/python -m venv venv --copies
+source ./venv/bin/activate
+pip install -r requirements.txt
+```
+
 ## Why?
 I designed this as an exercise in developing a light-weight, and secure blogging platform. I want to use it for my blog, which will probably live over at https://blog.pat.sh/
 

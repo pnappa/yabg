@@ -18,7 +18,6 @@
 """
 
 import sqlite3
-# import img2ansi
 import tornado.web
 from urllib.parse import urlparse
 import tornado.ioloop
@@ -26,28 +25,21 @@ import json
 
 # token gen & presentation
 import secrets
-# storing the captcha token
+# storing the captcha token/email address securely
 import hmac
 
-# 256bits for secret key
-TOKEN_BYTES = 32
-# 128 bits for captcha ID
-ID_BYTES = 16
-# TODO: replace with secret loaded from disk
-HMAC_SECRET = "testsecretpleaseignore".encode('utf-8')
+# our libraries
+import utils
+import db
+import globaldata
 
-TOKEN_HEADER = "X-Token"
 
-# domain required for origin/referer check
-expected_hostname = "localhost"
-
-sql_con = sqlite3.connect("cooldb.db")
+sql_con = None
 
 # check if the request to our endpoints is not malicious, basically:
 # https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
 def check_csrf(func):
     def wrapper(self, *args, **kwargs):
-        global expected_site_name
 
         def fail(self):
             self.set_status(400)
@@ -63,7 +55,7 @@ def check_csrf(func):
 
         # origin or referer must match my site
         received_hostything = self.request.headers.get('Origin') or self.request.headers.get('Referer')
-        if received_hostything is None or urlparse(received_hostything).hostname != expected_hostname:
+        if received_hostything is None or urlparse(received_hostything).hostname != globaldata.expected_hostname:
             print(received_hostything)
             print(urlparse(received_hostything).hostname)
             print("Origin/Referer fail")
@@ -72,33 +64,6 @@ def check_csrf(func):
         return func(self, *args, **kwargs)
 
     return wrapper
-
-# TODO: replace with something hard
-def get_challenge(challenge_type):
-    """
-    @param: challenge_type
-        one of text, ansi
-    @return: hint,answers tuple
-        hint should contain the type, and what the client should display
-
-        hint= {
-            "hint_type": "text",
-            "display_data": "what is the value of 5+two?"
-        }
-    """
-    if challenge_type == "text":
-        return {"hint_type": "text", "display_data": "what is the value of 5+two?"}, { "answers": ["7", "seven"] }
-
-def store_captcha_id(captcha_id, thread_id):
-    with sql_con:
-        sql_con.execute("INSERT INTO tokenmapping(captcha_id, thread_id) VALUES(?, ?)", (captcha_id, thread_id))
-
-def store_challenge(captcha_id, hint, answers):
-    hint_str = json.dumps(hint)
-    answers_str = json.dumps(answers)
-
-    with sql_con:
-        sql_con.execute("INSERT INTO challenges(captcha_id, answer, hint) VALUES(?, ?, ?)", (captcha_id, answers_str, hint_str))
 
 def does_thread_exist(thread_id):
     c = sql_con.cursor()
@@ -119,10 +84,10 @@ def captcha_answer_valid(provided, correct_answers):
 
 def generate_captcha_token(captcha_id):
     c = sql_con.cursor()
-    captcha_token = secrets.token_urlsafe(TOKEN_BYTES)
+    captcha_token = secrets.token_urlsafe(globaldata.TOKEN_BYTES)
     # ^ err, maybe not urlsafe? I need bytes for the hmac, but I guess i can just convert the str to bytes? Doesn't really matter, except maybe for some extreme edge case 
     
-    captcha_token_hash = hmac.new(HMAC_SECRET, captcha_token.encode('utf-8'), 'sha256').digest()
+    captcha_token_hash = hmac.new(globaldata.HMAC_SECRET, captcha_token.encode('utf-8'), 'sha256').digest()
     print("tokenhashtype", type(captcha_token_hash))
     c.execute("INSERT INTO tokens(captcha_id, token) VALUES(?,?);", (captcha_id, captcha_token_hash))
 
@@ -151,7 +116,7 @@ def is_captcha_id_valid(captcha_id, thread_id):
 
 # check whether the captcha_token is valid
 def is_token_valid(captcha_id, captcha_token):
-    token_hash = hmac.new(HMAC_SECRET, captcha_token.encode("utf-8"), 'sha256').digest()
+    token_hash = hmac.new(globaldata.HMAC_SECRET, captcha_token.encode("utf-8"), 'sha256').digest()
     c = sql_con.cursor()
     c.execute("SELECT token FROM tokens WHERE captcha_id=?;", (captcha_id,))
     row = c.fetchone()
@@ -198,37 +163,13 @@ def remove_challenge(captcha_id):
 # /captcha/THREADID/
 class RequestCaptcha(tornado.web.RequestHandler):
     @check_csrf
-    # return a UUID, and captcha data, to allow posting for <thread> comments
     def post(self, thread_id):
         # TODO: check IP for throttling
 
-        # id to uniquely identify captcha request
-        captcha_id = secrets.token_urlsafe(ID_BYTES)
-        # the thread this captcha token will apply to
-        thread_id = int(thread_id)
+        sc, ret_json = utils.make_captcha(sql_con.cursor(), thread_id, "text")
 
-        if not does_thread_exist(thread_id):
-            nonexistent_thread_error(self, thread_id)
-            return
-
-        # FK constraint will fail 
-        try:
-            store_captcha_id(captcha_id, thread_id)
-        except sqlite3.IntegrityError as e:
-            # shouldn't ever be called due to the does_thread_exist check, and the integ error will be from FK constraints
-            print("warning: integrity error on thread_id=%".format(thread_id))
-            nonexistent_thread_error(self, thread_id)
-            return
-        
-        # get captcha challenge and store it
-        hint, answers = get_challenge('text')
-        store_challenge(captcha_id, hint, answers)
-
-        # the json we're returning
-        write_dict = {"id": captcha_id, "captcha": hint}
-        
-        self.write(write_dict)
-        self.finish()
+        self.status_code = sc
+        self.write(ret_json)
 
 # /captcha/THREADID/solve/
 class HandleCaptcha(tornado.web.RequestHandler):
@@ -284,7 +225,7 @@ class MessageHandler(tornado.web.RequestHandler):
     def post(self, threadid):
         request_json = tornado.escape.json_decode(self.request.body)
         captcha_id = request_json["captchaid"]
-        captcha_token = self.request.headers.get(TOKEN_HEADER)
+        captcha_token = self.request.headers.get(globaldata.TOKEN_HEADER)
 
         # does this thread exist?
         if not does_thread_exist(threadid):
@@ -328,7 +269,7 @@ class MessageHandler(tornado.web.RequestHandler):
         email = post_json["email"] if "email" in post_json else None
         email_hash = None
         if email is not None:
-            email_hash = hmac.new(HMAC_SECRET, email.encode("utf-8"), 'sha256').digest()
+            email_hash = hmac.new(globaldata.HMAC_SECRET, email.encode("utf-8"), 'sha256').digest()
 
         comment_id = make_post(threadid, captcha_id, title, author_name, body, email_hash, ipaddr=None)
 
@@ -392,6 +333,8 @@ def make_app():
         ])
 
 if __name__ == "__main__":
+    sql_con = sqlite3.connect("cooldb.db")
+
     # need to do this to enforce foreign keys
     sql_con.execute("PRAGMA foreign_keys = ON")
 
