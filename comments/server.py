@@ -20,34 +20,25 @@
 """
 
 import sqlite3
-import tornado.web
 from urllib.parse import urlparse
+import tornado.web
 import tornado.ioloop
-import json
-
-# token gen & presentation
-import secrets
-# storing the captcha token/email address securely
-import hmac
 
 # our libraries
 import utils
-import db
 import globaldata
 
-
-sql_con = None
+SQL_CON = None
 
 # check if the request to our endpoints is not malicious, basically:
 # https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
 def check_csrf(func):
     def wrapper(self, *args, **kwargs):
-
         def fail(self):
             self.set_status(400)
-            self.write({"error": "csrf, please ensure Origin/Referer headers are set correctly & you are making a request with XMLHTTPRequest"})
+            self.write(
+                {"error": "csrf, please ensure Origin/Referer headers are set correctly & you are making a request with XMLHTTPRequest"})
             self.finish()
-            return None
 
         # ensure request was made with JS
         auth_header = self.request.headers.get('X-Requested-With')
@@ -56,7 +47,8 @@ def check_csrf(func):
             return fail(self)
 
         # origin or referer must match my site
-        received_hostything = self.request.headers.get('Origin') or self.request.headers.get('Referer')
+        received_hostything = self.request.headers.get(
+            'Origin') or self.request.headers.get('Referer')
         if received_hostything is None or urlparse(received_hostything).hostname != globaldata.expected_hostname:
             print(received_hostything)
             print(urlparse(received_hostything).hostname)
@@ -68,34 +60,41 @@ def check_csrf(func):
     return wrapper
 
 # /captcha/THREADID/
+
+
 class RequestCaptcha(tornado.web.RequestHandler):
     @check_csrf
     def post(self, thread_id):
         # TODO: check IP for throttling - can't have one guy requesting too many captchas
 
-        sql_cursor = sql_con.cursor()
-        sc, ret_json = utils.make_captcha(sql_cursor, thread_id, "text")
+        sql_cursor = SQL_CON.cursor()
+        stat_code, ret_json = utils.make_captcha(sql_cursor, thread_id, "text")
         sql_cursor.close()
 
-        self.status_code = sc
+        self.set_status(stat_code)
         self.write(ret_json)
 
 # /captcha/THREADID/solve/
+
+
 class HandleCaptcha(tornado.web.RequestHandler):
     # check stuff, and return cryptographic captcha token if valid
     @check_csrf
     def post(self, thread_id):
         request_json = tornado.escape.json_decode(self.request.body)
 
-        sql_cursor = sql_con.cursor()
-        sc, ret_json = utils.validate_captcha(sql_cursor, thread_id, request_json)
+        sql_cursor = SQL_CON.cursor()
+        stat_code, ret_json = utils.validate_captcha(
+            sql_cursor, thread_id, request_json)
         sql_cursor.close()
 
-        self.status_code = sc
+        self.set_status(stat_code)
         self.write(ret_json)
 
 # posting a comment, and retrieving comments
 # /comments/THREADID/
+
+
 class MessageHandler(tornado.web.RequestHandler):
     # upload the message (provided they have a valid captcha key)
     @check_csrf
@@ -105,11 +104,12 @@ class MessageHandler(tornado.web.RequestHandler):
         if globaldata.TOKEN_HEADER in self.request.headers:
             captcha_token = self.request.headers.get(globaldata.TOKEN_HEADER)
 
-        sql_cursor = sql_con.cursor()
-        sc, ret_json = utils.post_comment(sql_cursor, thread_id, request_json, captcha_token)
+        sql_cursor = SQL_CON.cursor()
+        stat_code, ret_json = utils.post_comment(
+            sql_cursor, thread_id, request_json, captcha_token)
         sql_cursor.close()
 
-        self.status_code = sc
+        self.set_status(stat_code)
         self.write(ret_json)
 
     # return a trove of all the comments that are available for that thread
@@ -119,12 +119,13 @@ class MessageHandler(tornado.web.RequestHandler):
         # as comment ids are positive, comments since id>-1 will return all
         since_comment_id = self.get_argument("since", default=-1)
 
-        sql_cursor = sql_con.cursor()
-        sc, ret_json = utils.get_comments(thread_id)
+        sql_cursor = SQL_CON.cursor()
+        stat_code, ret_json = utils.get_comments(sql_cursor, thread_id, since_comment_id)
         sql_cursor.close()
 
-        self.status_code = sc
+        self.set_status(stat_code)
         self.write(ret_json)
+
 
 class RequestDeleteToken(tornado.web.RequestHandler):
     # ...
@@ -134,6 +135,7 @@ class RequestDeleteToken(tornado.web.RequestHandler):
         self.write({"error": "unimplemented"})
         self.finish()
 
+
 class ProcessDeletion(tornado.web.RequestHandler):
     @check_csrf
     def get(self, thread_id, comment_id):
@@ -141,6 +143,7 @@ class ProcessDeletion(tornado.web.RequestHandler):
         self.set_status(500)
         self.write({"error": "unimplemented"})
         self.finish()
+
 
 def make_app():
     return tornado.web.Application([
@@ -158,15 +161,15 @@ def make_app():
         (r"/comments/(.+)/delete/(.+)/", ProcessDeletion),
 
         # (r"/comments/(.+)/(.+)/", AdminMessage planned to allow me to modify/delete messages
-        ])
+    ])
+
 
 if __name__ == "__main__":
-    sql_con = sqlite3.connect("cooldb.db")
+    SQL_CON = sqlite3.connect("cooldb.db")
 
     # need to do this to enforce foreign keys
-    sql_con.execute("PRAGMA foreign_keys = ON")
+    SQL_CON.execute("PRAGMA foreign_keys = ON")
 
     app = make_app()
     app.listen(10001, address="127.0.0.1")
     tornado.ioloop.IOLoop.current().start()
-
