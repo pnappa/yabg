@@ -163,10 +163,12 @@ def remove_challenge(captcha_id):
 # /captcha/THREADID/
 class RequestCaptcha(tornado.web.RequestHandler):
     @check_csrf
-    def post(self, thread_id):
-        # TODO: check IP for throttling
-
-        sc, ret_json = utils.make_captcha(sql_con.cursor(), thread_id, "text")
+    def post(self, thread_id): 
+        # TODO: check IP for throttling - can't have one guy requesting too many captchas
+        
+        sql_cursor = sql_con.cursor()
+        sc, ret_json = utils.make_captcha(sql_cursor, thread_id, "text")
+        sql_cursor.close()
 
         self.status_code = sc
         self.write(ret_json)
@@ -175,129 +177,48 @@ class RequestCaptcha(tornado.web.RequestHandler):
 class HandleCaptcha(tornado.web.RequestHandler):
     # check stuff, and return cryptographic captcha token if valid
     @check_csrf
-    def post(self, threadid):
-        # TODO: check captcha_id isn't more than a day old, probably can check within the next sql query
-
+    def post(self, thread_id):
         request_json = tornado.escape.json_decode(self.request.body)
 
-        captcha_id = request_json["id"]
-        print(captcha_id)
-        provided_attempt = request_json["answer"]
-
-        c = sql_con.cursor()
-        c.execute("SELECT answer FROM challenges WHERE captcha_id=?;", (captcha_id,))
-        correct_ans = c.fetchone()
-        sql_con.commit()
-        c.close()
-        if correct_ans is None:
-            captcha_id_nonexistent_error(self)
-            return
-        correct_answers = json.loads(correct_ans[0])["answers"]
-
-        is_valid = captcha_answer_valid(provided_attempt, correct_answers)
-        if is_valid:
-            # TODO: enforce expiry is in rfc3339
-            expiry, captcha_token = generate_captcha_token(captcha_id)
-            remove_challenge(captcha_id)
-            
-            ret_json = {}
-            ret_json["id"] = captcha_id
-            ret_json["status"] = 'ok'
-            ret_json["key"] = { "token": captcha_token, "expiry": expiry}
-
-            self.set_status(200)
-            self.write(ret_json)
-            return
-
-        # TODO: get the number of invalid attempts on this captcha, and deny if invalid
-        #   if it's invalid, we can chuck away anything stored with this captcha_id.
+        sql_cursor = sql_con.cursor()
+        sc, ret_json = utils.validate_captcha(sql_cursor, thread_id, request_json)
+        sql_cursor.close() 
         
-        self.set_status(200)
-        self.write({"id": captcha_id, "status": "try again"})
-
-        self.finish()
+        self.status_code = sc
+        self.write(ret_json)
 
 # posting a comment, and retrieving comments
 # /comments/THREADID/
 class MessageHandler(tornado.web.RequestHandler):
     # upload the message (provided they have a valid captcha key)
     @check_csrf
-    def post(self, threadid):
+    def post(self, thread_id):
         request_json = tornado.escape.json_decode(self.request.body)
-        captcha_id = request_json["captchaid"]
-        captcha_token = self.request.headers.get(globaldata.TOKEN_HEADER)
+        captcha_token = None
+        if globaldata.TOKEN_HEADER in self.request.headers:
+            captcha_token = self.request.headers.get(globaldata.TOKEN_HEADER)
 
-        # does this thread exist?
-        if not does_thread_exist(threadid):
-            nonexistent_thread_error(self, thread_id)
-            return
+        sql_cursor = sql_con.cursor()
+        sc, ret_json = utils.post_comment(sql_cursor, thread_id, request_json, captcha_token)
+        sql_cursor.close()
 
-        # does this captcha id exist?
-        if not is_captcha_id_valid(captcha_id, threadid):
-            captcha_id_nonexistent_error(self)
-            return
-
-        # user didn't provide a captcha token
-        if captcha_token is None:
-            self.set_status(400)
-            ret_json = {"errno": 8, "error": "missing token"}
-            self.write(ret_json)
-            return
-
-        # invalid token for this captcha id
-        if not is_token_valid(captcha_id, captcha_token):
-            invalid_token(self)
-            return
-
-        # reaching here means we've got a valid crypto token.
-        # unfortunately...we need to now check all the post stuff is in there
-        if "post" not in request_json:
-            invalid_post(self)
-            return
-
-        post_json = request_json["post"]
-        
-        # enforce mandatory fields
-        if "title" not in post_json or "body" not in post_json or "name" not in post_json:
-            invalid_post(self)
-            return
-
-        # TODO: get ip for logging (storing in the comments table in the db). tbh this should be in every fn.
-        title = post_json["title"]
-        body = post_json["body"]
-        author_name = post_json["name"]
-        email = post_json["email"] if "email" in post_json else None
-        email_hash = None
-        if email is not None:
-            email_hash = hmac.new(globaldata.HMAC_SECRET, email.encode("utf-8"), 'sha256').digest()
-
-        comment_id = make_post(threadid, captcha_id, title, author_name, body, email_hash, ipaddr=None)
-
-        self.set_status(200)
-        self.write({
-                "captchaid": captcha_id,
-                "commendid": comment_id
-            })
-        self.finish()
+        self.status_code = sc
+        self.write(ret_json)
 
     # return a trove of all the comments that are available for that thread
+    # this takes a query argument, since, which filters to results to those after that comment_id
     @check_csrf
-    def get(self, threadid):
-        since = self.get_argument("since", default=-1)
+    def get(self, thread_id):
+        # as comment ids are positive, comments since id>-1 will return all
+        since_comment_id = self.get_argument("since", default=-1)
 
-        c = sql_con.cursor()
-        c.execute("SELECT id, title, commentbody, author_name FROM comments WHERE thread_id=? AND id > ?;", (threadid, since))
-        ret_comments = []
-        for row in c.fetchall():
-            ret_comments.append({"commentid": row[0], "title": row[1], "body": row[2], "name": row[3]})
+        sql_cursor = sql_con.cursor()
+        sc, ret_json = utils.get_comments(thread_id)
+        sql_cursor.close()
 
-        sql_con.commit()
-        c.close()
-
-        self.set_status(200)
-        self.write({"comments": ret_comments})
-        self.finish()
-
+        self.status_code = sc
+        self.write(ret_json)
+        
 class RequestDeleteToken(tornado.web.RequestHandler):
     # ...
     @check_csrf

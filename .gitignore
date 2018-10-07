@@ -114,3 +114,4 @@ dmypy.json
 *.swp
 *.db
 *.swo
+*.autosave

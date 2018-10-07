@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS tokens(
     -- SHA256 hash of 256bit token
     token               BYTEA,
     created     DATE DEFAULT (DATETIME('now')) NOT NULL,
-    expiry      DATE DEFAULT (DATETIME('now', '+5 minutes')) NOT NULL,
+    expiry      DATE DEFAULT (DATETIME('now', '+20 minutes')) NOT NULL,
 
     FOREIGN KEY(captcha_id) REFERENCES tokenmapping(captcha_id) ON DELETE CASCADE
 );
@@ -49,12 +49,15 @@ CREATE TABLE IF NOT EXISTS tokens(
 CREATE TABLE IF NOT EXISTS challenges(
     captcha_id          VARCHAR(24) PRIMARY KEY,
 
-    -- answer to captcha query - json wrapped array
+    -- answer to captcha query - json wrapped array (contains multiple answers)
+    -- XXX: rename to answers
+    -- we cooould hash this, but not sure if its really relevant
     answer      TEXT NOT NULL,
 
     -- json response string that is what we send to the client (we keep for posterity)
-    -- we cooould hash this, but not sure if its really relevant
     hint        TEXT NOT NULL,
+
+    attempts    INTEGER NOT NULL DEFAULT 0,
 
     FOREIGN KEY(captcha_id) REFERENCES tokenmapping(captcha_id) ON DELETE CASCADE
 );

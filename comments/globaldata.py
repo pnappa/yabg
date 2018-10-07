@@ -8,5 +8,8 @@ HMAC_SECRET = "testsecretpleaseignore".encode('utf-8')
 
 TOKEN_HEADER = "X-Token"
 
+# per captcha_id
+MAX_ATTEMPTS = 3
+
 # domain required for origin/referer check
 expected_hostname = "localhost"
