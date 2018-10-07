@@ -12,11 +12,16 @@
 
     TODO: Ensure that the user's IP is validly logged (i.e. set X-Real-IP in nginx)
     TODO: Change all SQL into stored procedures.
-    TODO: careful of TOCTOU bugs. I should coagulate databse interactions more, methinks.
+            - hm, not sure if this is necessary now.
+    TODO: replace print statements with logging statements, and add more in places.
+            - some exceptions, like invalid token (non-stale) might be a good idea, to log fradulent attempts
+    TODO: what about some functionality where I return a colour that's like a hash of the IP address, so that 
+          when the user's name is displayed, it is in that colour.
+            - why? to ensure that user's can't really copy-cat each other easily, but still reduce the entropy
+              so that you can't infer someone's IP address via their username colour.
 
     Refer to protocol/userflow.png for the current protocol/userflow for captcha and comments.
         Although you should really look at userflow.dia, as I may have forgotten to render into a png.
-
 """
 
 import sqlite3
@@ -26,7 +31,7 @@ import tornado.ioloop
 
 # our libraries
 import utils
-import globaldata
+import settings
 
 SQL_CON = None
 
@@ -53,7 +58,7 @@ def check_csrf(func):
         # origin or referer must match my site
         received_hostything = self.request.headers.get(
             'Origin') or self.request.headers.get('Referer')
-        if received_hostything is None or urlparse(received_hostything).hostname != globaldata.expected_hostname:
+        if received_hostything is None or urlparse(received_hostything).hostname != settings.EXPECTED_HOSTNAME:
             print(received_hostything)
             print(urlparse(received_hostything).hostname)
             print("Origin/Referer fail")
@@ -114,8 +119,8 @@ class MessageHandler(tornado.web.RequestHandler):
     def post(self, thread_id):
         request_json = tornado.escape.json_decode(self.request.body)
         captcha_token = None
-        if globaldata.TOKEN_HEADER in self.request.headers:
-            captcha_token = self.request.headers.get(globaldata.TOKEN_HEADER)
+        if settings.TOKEN_HEADER in self.request.headers:
+            captcha_token = self.request.headers.get(settings.TOKEN_HEADER)
 
         sql_cursor = SQL_CON.cursor()
         stat_code, ret_json = utils.post_comment(
@@ -141,7 +146,12 @@ class MessageHandler(tornado.web.RequestHandler):
 
 
 class RequestDeleteToken(tornado.web.RequestHandler):
-    # ...
+    """
+    Handling for /comments/THREADID/requestdelete/COMMENTID
+
+    This will send a email to the user if the provided email matches the stored email for that comment.
+    The email will contain a link to delete the post.
+    """
     @check_csrf
     def post(self, thread_id, comment_id):
         self.set_status(500)
@@ -150,6 +160,14 @@ class RequestDeleteToken(tornado.web.RequestHandler):
 
 
 class ProcessDeletion(tornado.web.RequestHandler):
+    """
+    Handling for /comments/THREADID/delete/COMMENTID/
+
+    This is a GET request, as it will be a link sent to the user.
+    I think I want it to provide an interstitial, which contains a form, upon which the user can click to complete it.
+    Why? Because if its just a link, email spam filters will likely visit it to check the authenticity of the post, so
+      if someone knows/guesses the other persons email, you can automatically delete their post without interaction! (:
+    """
     @check_csrf
     def get(self, thread_id, comment_id):
         # TODO: process deltoken query parameter
@@ -182,6 +200,9 @@ if __name__ == "__main__":
 
     # need to do this to enforce foreign keys
     SQL_CON.execute("PRAGMA foreign_keys = ON")
+
+    # load settings
+    settings.init()
 
     app = make_app()
     app.listen(10001, address="127.0.0.1")

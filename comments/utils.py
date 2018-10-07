@@ -10,7 +10,7 @@ import hmac
 from functools import wraps
 
 import db
-import globaldata
+import settings
 from errors import *
 
 def request_wrapper(func):
@@ -61,9 +61,9 @@ def get_challenge(challenge_type):
 
 def generate_captcha_token(sql_cursor, captcha_id):
     # gen crypto token
-    captcha_token = secrets.token_urlsafe(globaldata.TOKEN_BYTES)
+    captcha_token = secrets.token_urlsafe(settings.TOKEN_BYTES)
     # make hmac, store token and captcha_id tuple
-    captcha_token_hash = hmac.new(globaldata.HMAC_SECRET,\
+    captcha_token_hash = hmac.new(settings.HMAC_SECRET,\
                                   captcha_token.encode('utf-8'), 'sha256').digest()
     expiry = db.store_token(sql_cursor, captcha_id, captcha_token_hash)
     # remove the captcha request from challenges
@@ -94,7 +94,7 @@ def is_token_valid(sql_cursor, captcha_id, captcha_token):
 
     token_hash = db.get_token_hash(sql_cursor, captcha_id)
     # hmac our token to see if it matches up with the DB token
-    computed_hash = hmac.new(globaldata.HMAC_SECRET,
+    computed_hash = hmac.new(settings.HMAC_SECRET,
                              captcha_token.encode('utf-8'), 'sha256').digest()
 
     if token_hash is None:
@@ -119,7 +119,7 @@ def make_captcha(sql_cursor, thread_id, challenge_type):
         raise NonExistentThreadError(thread_id)
 
     # generate unique ID for each captcha
-    captcha_id = secrets.token_urlsafe(globaldata.ID_BYTES)
+    captcha_id = secrets.token_urlsafe(settings.ID_BYTES)
 
     hint, answers = get_challenge(challenge_type)
     db.store_challenge(sql_cursor, captcha_id, thread_id, hint, answers)
@@ -152,7 +152,7 @@ def validate_captcha(sql_cursor, thread_id, request_json):
 
     # sanity check that we're not in a state where we didn't clean up captcha_id
     #   after too many attempts
-    if attempt_number > globaldata.MAX_ATTEMPTS:
+    if attempt_number > settings.MAX_ATTEMPTS:
         raise RuntimeError("captcha_id ({}) not removed after too many attempts".format(captcha_id))
 
     # check if valid answer and increment number of attempts
@@ -164,7 +164,7 @@ def validate_captcha(sql_cursor, thread_id, request_json):
         return 200, ret_json
 
     # failed on the last try?
-    if attempt_number == globaldata.MAX_ATTEMPTS:
+    if attempt_number == settings.MAX_ATTEMPTS:
         # delete all data relating to this captcha_id
         db.remove_captcha(sql_cursor, captcha_id)
         # tell them they need to start from another captcha
@@ -200,7 +200,7 @@ def post_comment(sql_cursor, thread_id, request_json, captcha_token):
     email = post_json["email"] if "email" in post_json else None
     email_hash = None
     if email is not None:
-        email_hash = hmac.new(globaldata.HMAC_SECRET, email.encode('utf-8'), 'sha256').digest()
+        email_hash = hmac.new(settings.HMAC_SECRET, email.encode('utf-8'), 'sha256').digest()
 
     # TODO: get ip address to store
 
