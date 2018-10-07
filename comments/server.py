@@ -19,6 +19,10 @@
           when the user's name is displayed, it is in that colour.
             - why? to ensure that user's can't really copy-cat each other easily, but still reduce the entropy
               so that you can't infer someone's IP address via their username colour.
+    TODO: replace email HMAC with argon2 hash
+    TODO: add some revision functionality
+            - what i mean by this is that users can view previous editions of each blog post. This seems nice and novel.
+            - i suppose this wouldn't be part of this, but instead static file generation, and the front end would pull/display data from that based on the front-end UIs settings.
 
     Refer to protocol/userflow.png for the current protocol/userflow for captcha and comments.
         Although you should really look at userflow.dia, as I may have forgotten to render into a png.
@@ -154,6 +158,10 @@ class RequestDeleteToken(tornado.web.RequestHandler):
     """
     @check_csrf
     def post(self, thread_id, comment_id):
+        # TODO: process whether they provided the right email.
+        # I will do this after I change the email hash to use Argon2 instead of the hmac. Buuut, I really should pepper it too.
+        #   probably a diff key to HMAC_SECRET_KEY though, just in case.
+
         self.set_status(500)
         self.write({"error": "unimplemented"})
         self.finish()

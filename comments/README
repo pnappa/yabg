@@ -2,3 +2,25 @@ this is a folder that will contain the server and database required for taking i
 note that the comments are stored in the sqlite database, with each article having an.
 perhaps that UUID will be a hash of the title? isn't too crazy of an idea... currently its an INTEGER type though
 
+
+
+You need a .env file in here, it should contain something like the following:
+
+    # TODO: better key
+    HMAC_SECRET_KEY="iwannabetheguy"
+    EXPECTED_HOSTNAME="localhost"
+    
+    # these should be set via an automatic benchmarking routine. basically, these depend on the machine you'll deploy to.
+    # TODO: make this take longer, without DoS my server.
+    # this leads to around 200 ms execution on my computer
+    ARGON_ROUNDS=20
+    # size in kiB to use (16MiB)
+    ARGON_MEMORY=16384
+    # number of threads to use (one because babby server)
+    ARGON_THREADS=1
+    # time in ms that we expect it to take on DO server (run argon2timing.py in the homedir), the above stats gave this figure.
+    # we do this so we can sleep for that amount of time on wrong attempts.
+    ARGON_EXPECTED_TIME=340
+    # we sleep between 0 and this in ms to provide some noise.
+    ARGON_FUZZING_TIME=50
+
