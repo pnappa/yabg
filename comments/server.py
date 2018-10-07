@@ -30,9 +30,13 @@ import globaldata
 
 SQL_CON = None
 
-# check if the request to our endpoints is not malicious, basically:
-# https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
 def check_csrf(func):
+    """
+    Check if the request to our endpoints is not unintentionally sent
+
+    see:
+        https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
+    """
     def wrapper(self, *args, **kwargs):
         def fail(self):
             self.set_status(400)
@@ -59,10 +63,13 @@ def check_csrf(func):
 
     return wrapper
 
-# /captcha/THREADID/
-
 
 class RequestCaptcha(tornado.web.RequestHandler):
+    """
+    Handling for /captcha/THREADID/
+
+    Provides the client with a captcha challenge, if eligible
+    """
     @check_csrf
     def post(self, thread_id):
         # TODO: check IP for throttling - can't have one guy requesting too many captchas
@@ -74,11 +81,14 @@ class RequestCaptcha(tornado.web.RequestHandler):
         self.set_status(stat_code)
         self.write(ret_json)
 
-# /captcha/THREADID/solve/
-
 
 class HandleCaptcha(tornado.web.RequestHandler):
-    # check stuff, and return cryptographic captcha token if valid
+    """
+    Handling for /captcha/THREADID/solve/
+
+    This endpoint processes the provided captcha answer, and awards token if its valid.
+    """
+
     @check_csrf
     def post(self, thread_id):
         request_json = tornado.escape.json_decode(self.request.body)
@@ -91,11 +101,14 @@ class HandleCaptcha(tornado.web.RequestHandler):
         self.set_status(stat_code)
         self.write(ret_json)
 
-# posting a comment, and retrieving comments
-# /comments/THREADID/
-
 
 class MessageHandler(tornado.web.RequestHandler):
+    """
+    Handling for /comments/THREADID/
+
+    Provides handling for posting and retrieving comments
+    """
+
     # upload the message (provided they have a valid captcha key)
     @check_csrf
     def post(self, thread_id):
