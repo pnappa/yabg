@@ -6,18 +6,19 @@
 import secrets
 import hmac
 
-# for our RequestWrapper decorator
+# for our request_wrapper decorator
 from functools import wraps
 
 import db
 import globaldata
 from errors import *
 
-def RequestWrapper(f):
+def request_wrapper(func):
     """
-    Decorator to refactor down that try except custom cruft that we use to simplify the requests, and ensure consistent error handling
+    Decorator to refactor down that try except custom cruft that we use to simplify the requests,
+    and ensure consistent error handling
     """
-    @wraps(f)
+    @wraps(func)
     def wrapper(*args, **kwargs):
         # XXX: fix this, this requires the assumption that sql_con is ALWAYS the first argument.
         # I guess i can duck type it, but that's shoddy
@@ -25,17 +26,18 @@ def RequestWrapper(f):
 
         try:
             sql_cursor.execute('begin')
-            res = f(*args, **kwargs)
+            res = func(*args, **kwargs)
             sql_cursor.execute('commit')
             return res
         # one of our "expected errors"
-        except CommentException as ce:
+        except CommentException as comment_except:
             sql_cursor.execute("rollback")
-            return ce.get_status_code(), ce.get_json_error()
+            return comment_except.get_status_code(), comment_except.get_json_error()
         # unknown error? still rollback, but propagate the exception
-        except Exception as e:
+        except Exception as exception:
             sql_cursor.execute("rollback")
-            raise e
+            raise exception
+
     return wrapper
 
 # TODO: replace with something hard
@@ -52,13 +54,17 @@ def get_challenge(challenge_type):
         }
     """
     if challenge_type == "text":
-        return {"hint_type": "text", "display_data": "what is the value of 5+two?"}, { "answers": ["7", "seven"] }
+        return {"hint_type": "text", "display_data": "what is the value of 5+two?"}, \
+               {"answers": ["7", "seven"]}
+
+    raise NotImplementedError("unknown challenge type")
 
 def generate_captcha_token(sql_cursor, captcha_id):
     # gen crypto token
     captcha_token = secrets.token_urlsafe(globaldata.TOKEN_BYTES)
     # make hmac, store token and captcha_id tuple
-    captcha_token_hash = hmac.new(globaldata.HMAC_SECRET, captcha_token.encode('utf-8'), 'sha256').digest()
+    captcha_token_hash = hmac.new(globaldata.HMAC_SECRET,\
+                                  captcha_token.encode('utf-8'), 'sha256').digest()
     expiry = db.store_token(sql_cursor, captcha_id, captcha_token_hash)
     # remove the captcha request from challenges
     db.remove_challenge(sql_cursor, captcha_id)
@@ -76,7 +82,8 @@ def is_post_valid(post_json):
         return False
 
     # of course they have to be strings
-    if type(post_json["title"]) != str or type(post_json["body"]) != str or type(post_json["name"]) != str:
+    if isinstance(post_json["title"], str) or isinstance(post_json["body"], str)\
+            or isinstance(post_json["name"], str):
         return False
 
     return True
@@ -87,13 +94,14 @@ def is_token_valid(sql_cursor, captcha_id, captcha_token):
 
     token_hash = db.get_token_hash(sql_cursor, captcha_id)
     # hmac our token to see if it matches up with the DB token
-    computed_hash = hmac.new(globaldata.HMAC_SECRET, captcha_token.encode('utf-8'), 'sha256').digest()
+    computed_hash = hmac.new(globaldata.HMAC_SECRET,
+                             captcha_token.encode('utf-8'), 'sha256').digest()
 
     if token_hash is None:
         raise InvalidTokenError()
     return hmac.compare_digest(token_hash, computed_hash)
 
-@RequestWrapper
+@request_wrapper
 def make_captcha(sql_cursor, thread_id, challenge_type):
     """
     @param thread_id: threads.id that the captcha is associated with
@@ -102,16 +110,17 @@ def make_captcha(sql_cursor, thread_id, challenge_type):
 
     @return status code, json output tuple
 
-    This function generates a captcha, and returns the json to send back to the requesting user.
+    This function generates a captcha, and returns the json
+        to send back to the requesting user.
     This captcha challenge is stored in the db for later comparison.
     """
 
     if not db.thread_exists(sql_cursor, thread_id):
         raise NonExistentThreadError(thread_id)
 
-    # generate unique ID for each captcha 
+    # generate unique ID for each captcha
     captcha_id = secrets.token_urlsafe(globaldata.ID_BYTES)
-    
+
     hint, answers = get_challenge(challenge_type)
     db.store_challenge(sql_cursor, captcha_id, thread_id, hint, answers)
 
@@ -119,7 +128,7 @@ def make_captcha(sql_cursor, thread_id, challenge_type):
 
     return 200, ret_json
 
-@RequestWrapper
+@request_wrapper
 def validate_captcha(sql_cursor, thread_id, request_json):
     """
     Given a user provided attempt, check whether we grant them a token or not
@@ -132,25 +141,28 @@ def validate_captcha(sql_cursor, thread_id, request_json):
         raise NonExistentAnswerError()
 
     # exists and not stale
-    if not db.is_valid_captcha(sql_cursor, captcha_id) or not db.is_challenge_available(sql_cursor, captcha_id):
+    if not db.is_valid_captcha(sql_cursor, captcha_id) or\
+       not db.is_challenge_available(sql_cursor, captcha_id):
         raise NonExistentCaptchaError(captcha_id)
 
     if not db.thread_exists(sql_cursor, thread_id):
         raise NonExistentThreadError(thread_id)
 
     attempt_number = db.get_attempt_count(sql_cursor, captcha_id) + 1
-    
-    # sanity check that we're not in a state where we didn't clean up captcha_id after too many attempts
+
+    # sanity check that we're not in a state where we didn't clean up captcha_id
+    #   after too many attempts
     if attempt_number > globaldata.MAX_ATTEMPTS:
-        raise RuntimeError("sanity check failed - captcha_id (%) not removed after too many attempts".format(captcha_id))
+        raise RuntimeError("captcha_id ({}) not removed after too many attempts".format(captcha_id))
 
     # check if valid answer and increment number of attempts
     is_valid = db.crossvalidate_answer(sql_cursor, captcha_id, provided_attempt)
     if is_valid:
         expiry, captcha_token = generate_captcha_token(sql_cursor, captcha_id)
-        ret_json = {"id": captcha_id, "status": "ok", "key": {"token": captcha_token, "expiry": expiry}}
+        ret_json = {"id": captcha_id, "status": "ok",
+                    "key": {"token": captcha_token, "expiry": expiry}}
         return 200, ret_json
-    
+
     # failed on the last try?
     if attempt_number == globaldata.MAX_ATTEMPTS:
         # delete all data relating to this captcha_id
@@ -161,7 +173,7 @@ def validate_captcha(sql_cursor, thread_id, request_json):
     return 200, {"id": captcha_id, "status": "try again"}
 
 
-@RequestWrapper
+@request_wrapper
 def post_comment(sql_cursor, thread_id, request_json, captcha_token):
 
     captcha_id = request_json["captcha_id"] if "captcha_id" in request_json else None
@@ -193,17 +205,16 @@ def post_comment(sql_cursor, thread_id, request_json, captcha_token):
     # TODO: get ip address to store
 
     # consume captcha token, plus post the comment to the database
-    comment_id = db.submit_post(sql_cursor, thread_id, captcha_id, title, author_name, comment_body, email_hash)
+    comment_id = db.submit_post(sql_cursor, thread_id, captcha_id, title,
+                                author_name, comment_body, email_hash)
 
     return 200, {"captcha_id": captcha_id, "comment_id": comment_id}
 
-@RequestWrapper
+@request_wrapper
 def get_comments(sql_cursor, thread_id, since_comment_id):
 
     if not db.thread_exists(sql_cursor, thread_id):
         raise NonExistentThreadError(thread_id)
 
     # XXX: do we need to check if since_comment_id is valid..?
-
     return 200, {"comments": db.comments_since(sql_cursor, thread_id, since_comment_id)}
-

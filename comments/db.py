@@ -2,7 +2,6 @@
     Handling all the database interactions.
 """
 
-import sqlite3
 import json
 
 def thread_exists(sql_cursor, thread_id):
@@ -13,7 +12,7 @@ def thread_exists(sql_cursor, thread_id):
 def store_challenge(sql_cursor, captcha_id, thread_id, hint, answers):
     hint_str = json.dumps(hint)
     answers_str = json.dumps(answers)
-    
+
     sql_cursor.execute("INSERT INTO tokenmapping(captcha_id, thread_id) VALUES(?,?)", (captcha_id, thread_id))
     sql_cursor.execute("INSERT INTO challenges(captcha_id, answer, hint) VALUES(?, ?, ?)", (captcha_id, answers_str, hint_str))
 
@@ -45,7 +44,7 @@ def crossvalidate_answer(sql_cursor, captcha_id, provided_attempt):
     # check whether answer is correct
     sql_cursor.execute("SELECT answer FROM challenges WHERE captcha_id=?", (captcha_id,))
     answers = json.loads(sql_cursor.fetchone()[0])["answers"]
-    
+
     # current correctness is determined by whether the verbatim answer is present in the answer list
     is_valid = provided_attempt in answers
     return is_valid
@@ -67,9 +66,9 @@ def get_token_hash(sql_cursor, captcha_id):
 def comments_since(sql_cursor, thread_id, since_comment_id):
     ret_comments = []
     sql_cursor.execute("SELECT id, title, commentbody, author_name FROM comments WHERE thread_id=? AND id > ?;", (thread_id, since_comment_id))
-    for row in c.fetchall():
+    for row in sql_cursor.fetchall():
         ret_comments.append({"comment_id": row[0], "title": row[1], "body": row[2], "name": row[3]})
-    
+
     return ret_comments
 
 def store_token(sql_cursor, captcha_id, captcha_token_hash):
@@ -92,5 +91,5 @@ def submit_post(sql_cursor, thread_id, captcha_id, title, author_name, comment_b
     # oh shit, it still exists, our cascade wasn't set up correctly.
     if sql_cursor.fetchone()[0] == 1:
         raise Exception("token invalidation routine not functioning...")
-    
+
     return comment_id

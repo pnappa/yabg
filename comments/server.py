@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
 """
-    A simple web server to handle user submitted comments. 
+    A simple web server to handle user submitted comments.
     This includes a custom-made captcha, based off image recognition.
     I wish to write this stuff in Go, C++ or whatever in the future.
+        Why? Well, to make it extremely low profile.
+        It would also require switching DB to a KV store - which is entirely doable, and should provide some speedup.
 
-    We require unique identifying codes for each blog-post, which dictates 
+    We require unique identifying codes for each blog-post, which dictates
         how the comment will be stored in the db
 
     TODO: Ensure that the user's IP is validly logged (i.e. set X-Real-IP in nginx)
@@ -13,8 +15,8 @@
     TODO: careful of TOCTOU bugs. I should coagulate databse interactions more, methinks.
 
     Refer to protocol/userflow.png for the current protocol/userflow for captcha and comments.
+        Although you should really look at userflow.dia, as I may have forgotten to render into a png.
 
-    
 """
 
 import sqlite3
@@ -65,107 +67,12 @@ def check_csrf(func):
 
     return wrapper
 
-def does_thread_exist(thread_id):
-    c = sql_con.cursor()
-    c.execute("SELECT EXISTS(SELECT 1 FROM threads where id = ?);", (thread_id,))
-    does_exist = c.fetchone()[0] == 1
-    c.close()
-
-    return does_exist
-
-def nonexistent_thread_error(request_handler, thread_id):
-    request_handler.set_status(404)
-    request_handler.write({"errno": 1, "error": "invalid thread id %".format(thread_id)})
-    request_handler.finish()
-
-def captcha_answer_valid(provided, correct_answers):
-    # if provided is one of the correct_answers
-    return provided in correct_answers
-
-def generate_captcha_token(captcha_id):
-    c = sql_con.cursor()
-    captcha_token = secrets.token_urlsafe(globaldata.TOKEN_BYTES)
-    # ^ err, maybe not urlsafe? I need bytes for the hmac, but I guess i can just convert the str to bytes? Doesn't really matter, except maybe for some extreme edge case 
-    
-    captcha_token_hash = hmac.new(globaldata.HMAC_SECRET, captcha_token.encode('utf-8'), 'sha256').digest()
-    print("tokenhashtype", type(captcha_token_hash))
-    c.execute("INSERT INTO tokens(captcha_id, token) VALUES(?,?);", (captcha_id, captcha_token_hash))
-
-    c.execute("SELECT expiry FROM tokens WHERE captcha_id=?;", (captcha_id,))
-    expiry = c.fetchone()[0]
-
-    sql_con.commit()
-
-    c.close()
-
-    return expiry,captcha_token
-
-def captcha_id_nonexistent_error(request_handler):
-    request_handler.set_status(400)
-    request_handler.write({"errno": 7, "error": "invalid captcha id, or captcha has been reset"})
-    request_handler.finish()
-
-# check whether a captcha id exists & pertains to a particular thread
-def is_captcha_id_valid(captcha_id, thread_id):
-    c = sql_con.cursor()
-    c.execute("SELECT EXISTS(SELECT 1 FROM tokenmapping WHERE thread_id=? AND captcha_id=?);", (thread_id, captcha_id))
-    isvalid = c.fetchone()[0] == 1
-    sql_con.commit()
-    c.close()
-    return isvalid
-
-# check whether the captcha_token is valid
-def is_token_valid(captcha_id, captcha_token):
-    token_hash = hmac.new(globaldata.HMAC_SECRET, captcha_token.encode("utf-8"), 'sha256').digest()
-    c = sql_con.cursor()
-    c.execute("SELECT token FROM tokens WHERE captcha_id=?;", (captcha_id,))
-    row = c.fetchone()
-    # there isn't a token?
-    if row is None:
-        raise Exception("checked captcha token that didn't exist... logic error?")
-    # timing safe comparison
-    res = hmac.compare_digest(row[0], token_hash)
-    sql_con.commit()
-    c.close()
-    return res
-
-def make_post(thread_id, captcha_id, title, author_name, body, email_hash, ipaddr=None):
-    # perform a sanity check that the thread_id and captcha id exist
-    if not is_captcha_id_valid(captcha_id, thread_id):
-        raise Exception("shit dog, somehow we made a post with a captcha_id that doesn't exist")
-
-    c = sql_con.cursor()
-    # invalidate captcha token (this will cascade into the rest)
-    c.execute("DELETE FROM tokenmapping WHERE captcha_id=?;", (captcha_id,))
-
-    # sanity check that the token doesn't exist anymore
-    c.execute("SELECT EXISTS(SELECT 1 from tokens WHERE captcha_id=?);", (captcha_id,))
-    sql_con.commit()
-    # oh shit, it still exists, our cascade wasn't set up correctly.
-    if c.fetchone()[0] == 1:
-        raise Exception("token invalidation routine not functioning...")
-
-    # store comment
-    c.execute("INSERT INTO comments(thread_id, title, author_name, commentbody, emailhash, ipaddr) VALUES(?,?,?,?,?,?);", (thread_id, title, author_name, body, email_hash, ipaddr))
-    comment_id = c.lastrowid
-    sql_con.commit()
-    c.close()
-
-    return comment_id
-            
-
-def remove_challenge(captcha_id):
-    c = sql_con.cursor()
-    c.execute("DELETE FROM challenges WHERE captcha_id=?", (captcha_id,))
-    sql_con.commit()
-    c.close()
-
 # /captcha/THREADID/
 class RequestCaptcha(tornado.web.RequestHandler):
     @check_csrf
-    def post(self, thread_id): 
+    def post(self, thread_id):
         # TODO: check IP for throttling - can't have one guy requesting too many captchas
-        
+
         sql_cursor = sql_con.cursor()
         sc, ret_json = utils.make_captcha(sql_cursor, thread_id, "text")
         sql_cursor.close()
@@ -182,8 +89,8 @@ class HandleCaptcha(tornado.web.RequestHandler):
 
         sql_cursor = sql_con.cursor()
         sc, ret_json = utils.validate_captcha(sql_cursor, thread_id, request_json)
-        sql_cursor.close() 
-        
+        sql_cursor.close()
+
         self.status_code = sc
         self.write(ret_json)
 
@@ -218,7 +125,7 @@ class MessageHandler(tornado.web.RequestHandler):
 
         self.status_code = sc
         self.write(ret_json)
-        
+
 class RequestDeleteToken(tornado.web.RequestHandler):
     # ...
     @check_csrf
