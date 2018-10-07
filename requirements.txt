@@ -1,0 +1,4 @@
+Jinja2==2.10
+MarkupSafe==1.0
+pycryptodome==3.6.6
+tornado==5.1.1

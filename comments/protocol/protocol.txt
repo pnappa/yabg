@@ -1,0 +1,149 @@
+
+start: 
+U->S: user requests captcha
+
+POST /captcha/THREADID/
+
+S->U: server sends UUID, and captcha data (if they've tried too often recently, tell them to back-off)
+
+not blacklisted/throttled:
+    {
+        id: 128bit ID,
+        captcha: {
+            type: "text",
+            hint: "what is the value of 5+two?"
+        }
+    } blacklisted/throttled: (status 429, set Retry-After header to utc + 10mins, or whatever the timeout is)
+    we do this even for blacklisted ones, so as not to hint that they're blacklisted
+    {
+        "error": "too many requests"
+    }
+
+U->S: id, captcha guess
+POST /captcha/THREADID/solve/
+    {
+        id: 128bit ID,
+        answer: "7"
+    }
+
+TO BE CONTINUED....
+
+S->U: status, one-time captcha token
+    {
+        id: 128bit ID,
+        status: "ok" || "restart" || "denied",
+        key: {
+            token: 256bit key,
+            expiry: timestamp (rfc3339 prob)
+        }
+    }
+    denied is true when the failure counter for a user is >12 within the last 10 minutes
+
+if status == restart:
+    server should increment failure counter for that user (users are identified by source IP and user agent)
+        when i say increment, i mean add a failure row for that user
+    user goto start
+if status == denied:
+    user goto fail      // ecks dee apple
+
+// status == ok
+U->S:
+    POST /comments/THREADID/
+    with header:
+    X-Token: 256bit key
+    body:
+    {
+        id: 128bit ID,          // we need this for timing attack safety (query DB with this)
+        post: {
+            title: wow, nice comment nerd,
+            email: me@pat.sh,               // optional
+            body: "multiline string...."
+        }
+    }
+
+if valid captcha token for captcha id:
+    S->U: status_code
+    {
+        "commentid": <posted comment id>        // potentially the frontend will scroll to it? useful to provide to them
+    }
+    
+    U->S: GET /comments/THREADID/?since=<most recently loaded post (not your post!!!)>
+    S->U:
+        {
+            comments: [
+                {
+                    commentid: <commentid>,
+                    title: ...,
+                    body: ...
+                    // note! we don't include email.
+                },
+                ...
+            ]
+else if invalid (or expired):
+    S->U: status_code
+    {
+        "error": "invalid token" || "expired token"
+    }
+
+done! 
+
+
+
+fail:
+    S->U: 429 (set next request time too Retry-After etc.)
+        { 
+            "error": "too many requests"
+        }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****
+scratch box after this
+****
+
+    
+S->U: status, one-time usable captcha secret  - 
+        status: either ok, or not ok, or timed out
+            it won't be ok if stale (i.e. give them 30secs?)
+        captcha secret: a random string that allows a comment to be posted (expires after use)
+            tied to the user's requested IP address, and will expire in 5 mins
+            also tied to the thread commenting in
+
+if ok:
+    U: probably requests comment data (AJAX request?) to stay up to date
+    S: server deletes data for that query
+if not ok and only a couple of tries:
+    S->U: new captcha data, UUID, && increments counter for failed tries for client
+if not ok and too many tries:
+    S: blacklist the IP temporarily
+    S->U: send the client a "you suck" msg, ask them to try in a min

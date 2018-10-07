@@ -1,4 +1,5 @@
 -- wtf this isn't enforced by default?!?!?
+-- sqlite you are retarded
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS threads(
@@ -9,38 +10,64 @@ CREATE TABLE IF NOT EXISTS threads(
 CREATE TABLE IF NOT EXISTS comments(
     id          INTEGER PRIMARY KEY,
     thread_id    INTEGER NOT NULL,
-    name        TEXT NOT NULL,              -- user supplied name
+    title        TEXT NOT NULL,              -- user supplied title
+    author_name  TEXT NOT NULL,                       -- user supplied name
     commentbody TEXT NOT NULL,              -- duh, this is what the comment is
-    email       TEXT,                       -- not actually displayed, but kept for logging stuff
-    ipaddr      TEXT NOT NULL,              -- ipv4 or v6?
+    emailhash       BYTEA,                       -- not actually displayed, but kept for comment deletion - only need the hash
+    ipaddr      TEXT,              -- XXX: handling ipv4 or v6? idk
     created     DATE DEFAULT (DATETIME('now')), -- when was the comment published?
 
-    FOREIGN KEY(thread_id) REFERENCES threads(id)
+    FOREIGN KEY(thread_id) REFERENCES threads(id) -- don't cascade these, because its best if they're archived.
 );
 
--- match tokens to threads (each token is only able to be used for one blog post)
+-- match captcha_ids to threads (each token is only able to be used for one blog post)
 CREATE TABLE IF NOT EXISTS tokenmapping(
-    captcha_id          BYTEA PRIMARY KEY,
+    -- id is 128 bit random string, converted to urlsafe string (secrets.token_urlsafe)
+    -- it is sufficiently long to make guessing other people's IDs annoying/v difficult
+
+    -- requires 22 chars, as ceil(16/3) * 4 -> 24
+    captcha_id          VARCHAR(24) PRIMARY KEY,
     thread_id           INTEGER NOT NULL,
+
+    -- keep track of this, as we can clean up stale tokens
+    created             DATE DEFAULT (DATETIME('now')),
+    expiry      DATE DEFAULT (DATETIME('now', '+1 day')) NOT NULL,
     
-    FOREIGN KEY(thread_id) REFERENCES threads(id)
+    FOREIGN KEY(thread_id) REFERENCES threads(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tokens(
-    captcha_id          BYTEA PRIMARY KEY,
+    captcha_id          VARCHAR(24) PRIMARY KEY,
+    -- SHA256 hash of 256bit token
+    token               BYTEA,
     created     DATE DEFAULT (DATETIME('now')) NOT NULL,
     expiry      DATE DEFAULT (DATETIME('now', '+5 minutes')) NOT NULL,
 
-    FOREIGN KEY(captcha_id) REFERENCES tokenmapping(captcha_id)
+    FOREIGN KEY(captcha_id) REFERENCES tokenmapping(captcha_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS challenges(
-    captcha_id          BYTEA PRIMARY KEY,
-    -- answer to captcha query - array
+    captcha_id          VARCHAR(24) PRIMARY KEY,
+
+    -- answer to captcha query - json wrapped array
     answer      TEXT NOT NULL,
 
     -- json response string that is what we send to the client (we keep for posterity)
+    -- we cooould hash this, but not sure if its really relevant
     hint        TEXT NOT NULL,
 
-    FOREIGN KEY(captcha_id) REFERENCES tokenmapping(captcha_id)
+    FOREIGN KEY(captcha_id) REFERENCES tokenmapping(captcha_id) ON DELETE CASCADE
 );
+
+-- these are generated 
+CREATE TABLE IF NOT EXISTS deletetokens(
+    id              VARCHAR(24) PRIMARY KEY,
+    -- sha256 hash of 256 bit token
+    secret          BYTEA NOT NULL,
+
+    comment_id      INTEGER NOT NULL,
+    thread_id       INTEGER NOT NULL,
+
+    FOREIGN KEY(thread_id) REFERENCES threads(id) ON DELETE CASCADE,
+    FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE
+    );
