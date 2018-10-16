@@ -2,17 +2,22 @@
 <!doctype html>
 
 <html>
+
     <head>
+        {% block pagehead %}
         <title>pat's blog</title>
+        <!-- this stuff is also defined in post.html (and potentially the front page), so if you change it here, you'll probably wanna change it there too. I'll probably factor this out. -->
+        <!-- TODO: SRI hash integrity stuff -->
         <script src="main.js" async></script>
         <link rel="stylesheet" type="text/css" href="main.css">
+        {% end %}
     </head>
     <body>
         {% include "header.html" %}
         {% block body %}
-        <h1>welcome... there should be some links somewhere</h1>
+        <h1>welcome</h1>
         <p>
-        Use the links in the header to navigate around the site and perform actions
+        There should be the list of front page posts here.
         </p>
         {% end %}
     </body>
