@@ -2,9 +2,14 @@
     General utility functions.
 """
 
+# hashing the captcha tokens
 # requires python >3.6
 import secrets
 import hmac
+
+# hashing the email with a time-throttled KDF
+from passlib.hash import argon2
+import time
 
 # for our request_wrapper decorator
 from functools import wraps
@@ -82,8 +87,8 @@ def is_post_valid(post_json):
         return False
 
     # of course they have to be strings
-    if isinstance(post_json["title"], str) or isinstance(post_json["body"], str)\
-            or isinstance(post_json["name"], str):
+    if not isinstance(post_json["title"], str) or not isinstance(post_json["body"], str)\
+            or not isinstance(post_json["name"], str):
         return False
 
     return True
@@ -100,6 +105,22 @@ def is_token_valid(sql_cursor, captcha_id, captcha_token):
     if token_hash is None:
         raise InvalidTokenError()
     return hmac.compare_digest(token_hash, computed_hash)
+
+def hash_email(email):
+    # hash using a strong KDF
+    res_hash = argon2.using(rounds=settings.ARGON_PARAMS["rounds"],
+                            memory_cost=settings.ARGON_PARAMS["memory"],
+                            parallelism=settings.ARGON_PARAMS["threads"]).hash(email)
+
+    # fuzz some time, so some side channel data isn't leaked
+    time.sleep(secrets.randbelow(settings.ARGON_PARAMS["fuzzing_time"])/1000)
+
+    return res_hash
+
+def compare_email(email, stored_hash):
+    # TODO: compare the two emails, but if email is none, or stored_hash is none, hash some dummy value
+    #       return the comparison of the two, after sleeping a fuzzed amount
+    raise NotImplementedError("lol")
 
 @request_wrapper
 def make_captcha(sql_cursor, thread_id, challenge_type):
@@ -196,11 +217,9 @@ def post_comment(sql_cursor, thread_id, request_json, captcha_token):
         raise InvalidPostError(post_json)
 
     title, comment_body, author_name = post_json["title"], post_json["body"], post_json["name"]
-    # optional email field
+    # optional email field, argon2 hash it
     email = post_json["email"] if "email" in post_json else None
-    email_hash = None
-    if email is not None:
-        email_hash = hmac.new(settings.HMAC_SECRET, email.encode('utf-8'), 'sha256').digest()
+    email_hash = hash_email(email)
 
     # TODO: get ip address to store
 

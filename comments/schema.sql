@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS comments(
     title        TEXT NOT NULL,              -- user supplied title
     author_name  TEXT NOT NULL,                       -- user supplied name
     commentbody TEXT NOT NULL,              -- duh, this is what the comment is
-    emailhash       BYTEA,                       -- not actually displayed, but kept for comment deletion - only need the hash
+    emailhash       TEXT,                       -- not actually displayed, but kept for comment deletion - only need the hash. This is text, as its an argon2 output string, of the form "$argon2i$....."
     ipaddr      TEXT,              -- XXX: handling ipv4 or v6? idk
     created     DATE DEFAULT (DATETIME('now')), -- when was the comment published?
 
