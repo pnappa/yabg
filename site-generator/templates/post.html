@@ -2,33 +2,30 @@
 
 <!-- the stuff that goes in the <head> tags -->
 {% block pagehead %}
-    <title>{{ pagetitle }}</title>
-    <!-- TODO: SRI hash integrity stuff -->
-    <script src="main.js" async></script>
-    <link rel="stylesheet" type="text/css" href="main.css">
-    {# contain the postid so we can use it for the JS #}
-    <meta name="postid" content="{{ postid }}">
+<title>{{ title }}</title>
+{# contain the postid so we can use it for the JS #}
+<meta name="postid" content="{{ postid }}">
 {% endblock %}
 
 {% block body %}
-    <article id="post">
-        <header> 
-            <h1>{{ title }}</h1>
-            <time>Posted: {{ postdate }}</time>
-            <span class="author">Author: {{ postauthor }}</span>
-        </header>
-        <p>
-        {# need to mark it as safe, because the markdown generator generates html! #}
-            {{ postcontent|safe }} 
-        </p>
+<article id="post">
+    <header> 
+        <h1>{{ title }}</h1>
+        <time>Written: {{ postdate }}</time>
+        <span class="author">Author: {{ postauthor }}</span>
+    </header>
+    {# need to mark it as safe, because the markdown generator generates html! #}
+    {{ postcontent|safe }} 
 
-        <footer>
-            <noscript>¡ we need js to display these comments ! <br>...yeah we use ajax and stuff to fetch and post comments</noscript>
+    <footer>
+        <noscript>¡ we need js to display these comments ! <br>...yeah we use ajax and stuff to fetch and post comments</noscript>
         <!-- probably put some button up to load the comment box? its gotta request a captcha somehow -->
         <div id="comments">
+            <h1>Comments</h1>
+            <a name="comments"></a>
             <!-- loaded comments are inserted here on the client -->
         </div>
-        </footer>
-    </article>
+    </footer>
+</article>
 {% endblock %}
 

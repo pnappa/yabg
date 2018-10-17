@@ -3,7 +3,15 @@
 {% block body %}
     here ye may find the list of posts
     <ul>
-        
+        {% for post in posts %}
+        {# assert that these are sorted...? #}
+        <li>
+            <a href="/posts/{{post["postname"]}}/">
+                <time>{{ post["postdate"] }}</time>
+                <h1>{{ post["title"]}}</h1>
+            </a>
+        </li>
+        {% endfor %}
     </ul>
 {% endblock %}
 

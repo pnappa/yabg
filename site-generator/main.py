@@ -9,6 +9,8 @@ import pytz
 
 import logging
 
+import shutil
+
 # generating html from md
 import markdown 
 # generating the final html
@@ -20,15 +22,20 @@ def warn(msg):
     logger.warning(msg)
 
 def err(msg):
-    logger = logging.getLogger()
-    logger.exception(msg)
+    try:
+        logger = logging.getLogger()
+        raise Exception(msg)
+    except:
+        logger.exception('exception triggered')
 
-def dbg(msg):
+def info(msg):
     logger = logging.getLogger()
-    logger.debug(msg)
+    logger.info(msg)
 
 def parse_file(filename, postname):
     # parse the supplied pat-markdown file, and extract out the tagged metadata.
+
+    info('parsing {}'.format(filename))
     
     mandatory_fields = ("title", "author") 
     # optional fields and their defaults if non-existent (none typically implies they may be generated for you.
@@ -99,8 +106,14 @@ def walklevel(some_dir, level=1):
             del dirs[:]
 
 def write_thread_id(post, idnum):
-    raise NotImplementedError("todo...")
+    # write the idnum into the metadata of the post's markdown file (prepend it)
+    with open(post['filename'], 'r') as original: data = original.read()
+    with open(post['filename'], 'w') as modified: modified.write("[id]: # ({})\n".format(idnum) + data)
 
+def write_thread_date(post, date_str):
+    # write the idnum into the metadata of the post's markdown file (prepend it)
+    with open(post['filename'], 'r') as original: data = original.read()
+    with open(post['filename'], 'w') as modified: modified.write("[postdate]: # ({})\n".format(date_str) + data)
 
 # https://stackoverflow.com/a/8556555
 def get_rfc3339_now():
@@ -125,15 +138,16 @@ def find_posts(directory):
     # extract all the thread ids explicitly set
     thread_ids = functools.reduce(lambda x,y: x + [y["id"]] if y["id"] is not None else x, post_metadata, ['0'])
 
-    # are there any duplicates?
+    # are there any duplicates? (also includes non-published ones!!!)
     if len(thread_ids) != len(set(thread_ids)):
         err("duplicate thread ids specified")
 
     sorted_ids = sorted(map(int, thread_ids))
 
+    # only parse those if it is valid (flag is set inside saying its complete)
+    post_metadata = [datum for datum in post_metadata if datum["publish"] == "true"]
+
     # enumerate the thread IDs - to provide the ability to suggest a post number
-    #   error out about duplicate post IDs
-    # we do this even for posts that aren't gonna be published.
     for datum in post_metadata:
         idnum = datum["id"]
         if idnum is None:
@@ -146,32 +160,40 @@ def find_posts(directory):
 
                 # set the thread id for this post within the source file
                 write_thread_id(datum, suggested)
-
             elif choice == 'n':
-                # can't publish without an id!
-                datum["publish"] = "false"
-                #err("User requested termination")
+                err("User requested termination")
             else:
                 err("invalid input, terminating")
                 
-        sorted_ids.append(suggested)
+            sorted_ids.append(suggested)
     
-    # only parse those if it is valid (flag is set inside saying its complete)
-    post_metadata = [datum for datum in post_metadata if datum["publish"] == "true"]
 
     # TODO handle includes
     # hopefully later down the track i support file includes
+    # a change i'd have to do would be to parse the entire file for md comments, instead of stopping early.
 
     for datum in post_metadata:
-        if "postdate" not in datum:
+        if datum["postdate"] is None:
             # TODO: ask user?
             datum["postdate"] = get_rfc3339_now()
             write_thread_date(datum, datum["postdate"])
 
     return post_metadata
 
+def dump_html(html, outfile):
+    # remove empty paragraphs
+    html = re.sub(r'<p>\s*</p>', '', html)
+    # TODO: minify
+
+    # create the nested folder if it doesn't exist already
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+
+    # save in directory (filename)
+    with open(outfile, 'w') as of:
+        of.write(html)
+
 def generate_post_html(post, outfile):
-    dbg("generating post html for {}".format(post))
+    info("generating post html for {}".format(post))
 
     # generate the blog post body
     md = markdown.Markdown()
@@ -184,23 +206,36 @@ def generate_post_html(post, outfile):
                              postid=post["id"], postcontent=postbody,
                              postdate=post["postdate"]) 
 
-    # create the nested folder if it doesn't exist already
-    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+    dump_html(output, outfile)
 
-    # save in directory (filename)
-    with open(outfile, 'w') as of:
-        of.write(output)
+def date_sorted(posts):
+    return sorted(posts, key=lambda x: x["postdate"], reverse=True)
 
 def generate_post_list(posts, outfile):
     # generate the html page that lists all the posts in rev chronological order
-    pass
+    info('generating list of posts') 
+
+    sorted_posts = date_sorted(posts)
+
+    template = JINJAENV.get_template('list.html')
+    output = template.render(posts=sorted_posts)
+
+    dump_html(output, outfile)
 
 def generate_front_page(posts, outfile):
     # generate the landing page with the provided posts
-    pass
+
+    sorted_posts = date_sorted(posts)
 
 if __name__ == "__main__":
     # TODO, configuration
+
+
+    logging.basicConfig(level=logging.INFO)
+
+    # remove previously generated files to a backup
+    os.makedirs('./backups', exist_ok=True)
+    shutil.move('./generated', './backups/' + get_rfc3339_now())
 
     # XXX: this can't contain a trailing slash/pathseparator - i prob should auto filter this in the function..
     posts = find_posts('/home/pnappa/github.com/pnappa/blog-entries')
@@ -213,3 +248,17 @@ if __name__ == "__main__":
     generate_post_list(posts, './generated/posts/index.html')
 
     generate_front_page(posts, './generated/index.html')
+
+    # copy static files to the generated dir
+    resource_dir = os.path.join(os.getcwd(),'resources/')
+    src_files = os.listdir(resource_dir)
+    print(src_files)
+    for filename in src_files:
+        fullfilename = os.path.join(resource_dir, filename)
+        if os.path.isfile(fullfilename):
+            info("copying resource file {}".format(fullfilename))
+            shutil.copy(fullfilename, './generated')
+
+    # TODO: deploy script
+
+    

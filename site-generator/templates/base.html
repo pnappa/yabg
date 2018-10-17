@@ -4,13 +4,16 @@
 <html>
 
     <head>
+        
         {% block pagehead %}
         <title>pat's blog</title>
-        <!-- this stuff is also defined in post.html (and potentially the front page), so if you change it here, you'll probably wanna change it there too. I'll probably factor this out. -->
-        <!-- TODO: SRI hash integrity stuff -->
-        <script src="main.js" async></script>
-        <link rel="stylesheet" type="text/css" href="main.css">
         {% endblock %}
+        <!-- TODO: SRI hash integrity stuff, move to CDN? -->
+        <script src="/main.js" async></script>
+        <link rel="stylesheet" type="text/css" href="/main.css">
+
+        <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
     </head>
     <body>
         {% include "header.html" %}

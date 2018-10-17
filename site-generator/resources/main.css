@@ -1,7 +1,54 @@
 #navheader {
     text-align:center;
+    margin: 10px;
 }
 
 #navheader table {
     display: inline-block;
+}
+
+article p {
+    padding: 10px 10px;
+}
+
+
+header a {
+    color: #f60000;
+}
+
+header a:hover {
+    color: red;
+}
+
+body {
+    background-color: #f1f1f1;
+}
+
+#post {
+    width: 800px;
+    margin: 0 auto;
+}
+
+article header {
+    background-color: #191919;    
+}
+
+article header h1 {
+    color: #ececec;
+    margin: 0;
+    display: block;
+    padding: 10px 10px 5px 10px;
+}
+
+article header time {
+    font-size: 10px;
+    color: #828282;
+    padding-left:10px;
+}
+
+article header .author {
+    padding: 10px;
+    display: block;
+    text-align: right;
+    color: #ececec;
 }
