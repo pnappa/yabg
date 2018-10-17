@@ -1,11 +1,19 @@
-import jinja2
 import os
 # parsing the md files for metadata
 import re
 
 import functools
+# generating rfc3339 strings
+import datetime
+import pytz
 
 import logging
+
+# generating html from md
+import markdown 
+# generating the final html
+from jinja2 import Environment, FileSystemLoader
+JINJAENV = Environment(loader=FileSystemLoader('templates'))
 
 def warn(msg):
     logger = logging.getLogger()
@@ -15,12 +23,16 @@ def err(msg):
     logger = logging.getLogger()
     logger.exception(msg)
 
+def dbg(msg):
+    logger = logging.getLogger()
+    logger.debug(msg)
+
 def parse_file(filename, postname):
     # parse the supplied pat-markdown file, and extract out the tagged metadata.
     
     mandatory_fields = ("title", "author") 
     # optional fields and their defaults if non-existent (none typically implies they may be generated for you.
-    optional_fields = {"date": None, "publish": False, "id": None}
+    optional_fields = {"postdate": None, "publish": 'false', "id": None}
 
     def mini_parse(line):
         # skip empty lines
@@ -60,7 +72,7 @@ def parse_file(filename, postname):
             err("missing fields in post: {}".format(filename))
     
     # set default field data
-    for meta_type, default in optional_fields:
+    for meta_type, default in optional_fields.items():
         if meta_type not in built_metadata:
             built_metadata.update({meta_type: default})
             # churn some warnings out
@@ -69,6 +81,8 @@ def parse_file(filename, postname):
 
     # add the url name (simply the dir it writes in, but this is provided to the fn tho)
     built_metadata.update({"postname": postname})
+    
+    built_metadata.update({"filename": filename})
 
     return built_metadata
 
@@ -84,9 +98,16 @@ def walklevel(some_dir, level=1):
         if num_sep + level <= num_sep_this:
             del dirs[:]
 
-
-def set_thread_id(post, idnum):
+def write_thread_id(post, idnum):
     raise NotImplementedError("todo...")
+
+
+# https://stackoverflow.com/a/8556555
+def get_rfc3339_now():
+    d = datetime.datetime.utcnow()
+    d_with_timezone = d.replace(tzinfo=pytz.UTC)
+    return d_with_timezone.isoformat()
+
 
 def find_posts(directory):
     # walk through, parse the markdown fields (probably the main one will be called main.md)
@@ -99,7 +120,7 @@ def find_posts(directory):
         if "main.md" not in files:
             err("missing markdown main.md file for post: {}".format(root))
 
-        post_metadata.append(parse_file(os.path.join(root, "main.md"), postname=root[root.rfind(os.path.sep)+1:]])
+        post_metadata.append(parse_file(os.path.join(root, "main.md"), postname=root[root.rfind(os.path.sep)+1:]))
 
     # extract all the thread ids explicitly set
     thread_ids = functools.reduce(lambda x,y: x + [y["id"]] if y["id"] is not None else x, post_metadata, ['0'])
@@ -112,43 +133,63 @@ def find_posts(directory):
 
     # enumerate the thread IDs - to provide the ability to suggest a post number
     #   error out about duplicate post IDs
+    # we do this even for posts that aren't gonna be published.
     for datum in post_metadata:
         idnum = datum["id"]
         if idnum is None:
             suggested = sorted_ids[-1]+1
             print("Alert! The following post does not have an ID set - {}".format(datum["postname"]))
-            print("Would you like to assign it post #{}? y/n (will halt compilation)".format(suggested))
+            print("Would you like to assign it post #{}? y/n (no will skip)".format(suggested))
             choice = input().strip()
             if choice == 'y':
                 datum["id"] = str(suggested)
-                # TODO: set the thread id for this post within the source file
+
+                # set the thread id for this post within the source file
+                write_thread_id(datum, suggested)
+
             elif choice == 'n':
-                err("User requested termination")
+                # can't publish without an id!
+                datum["publish"] = "false"
+                #err("User requested termination")
             else:
                 err("invalid input, terminating")
                 
         sorted_ids.append(suggested)
     
-    # for each valid (i.e. ones marked as publishable)
-    raise NotImplementedError('still need to test/finish this bad boy')
+    # only parse those if it is valid (flag is set inside saying its complete)
+    post_metadata = [datum for datum in post_metadata if datum["publish"] == "true"]
 
-    # if it is valid (flag is set inside saying its complete), then preprocess - handle the includes, and extract post id, postname (dir but URL safe), title, author, 
+    # TODO handle includes
+    # hopefully later down the track i support file includes
 
-    # ask the user to verify/add info
-    #   such as, adding the date, and post number
-    #   these will be inserted /into/ the source markdown file.
-    #   so, that on the next generation, the user won't be asked
-    #   date should be $(date --rfc-3339=ns)
-    #   post number should be chronologically next post
+    for datum in post_metadata:
+        if "postdate" not in datum:
+            # TODO: ask user?
+            datum["postdate"] = get_rfc3339_now()
+            write_thread_date(datum, datum["postdate"])
 
-    # return a dict of posts that should be generated for.
-
-    pass
+    return post_metadata
 
 def generate_post_html(post, outfile):
+    dbg("generating post html for {}".format(post))
+
+    # generate the blog post body
+    md = markdown.Markdown()
+    with open(post["filename"], 'r') as mdIn:
+        postbody = md.convert("".join(mdIn.readlines()))
+
     # chuck the post data into the template post.html
+    template = JINJAENV.get_template("post.html")
+    output = template.render(title=post["title"], postauthor=post["author"], 
+                             postid=post["id"], postcontent=postbody,
+                             postdate=post["postdate"]) 
+
+    # create the nested folder if it doesn't exist already
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+
     # save in directory (filename)
-    pass
+    with open(outfile, 'w') as of:
+        of.write(output)
 
 def generate_post_list(posts, outfile):
     # generate the html page that lists all the posts in rev chronological order
