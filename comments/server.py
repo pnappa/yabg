@@ -33,6 +33,9 @@ from urllib.parse import urlparse
 import tornado.web
 import tornado.ioloop
 
+import random
+import db
+
 # our libraries
 import utils
 import settings
@@ -184,9 +187,23 @@ class ProcessDeletion(tornado.web.RequestHandler):
         self.finish()
 
 
+class RandomRedirect(tornado.web.RequestHandler):
+    """
+    Getting this page will redirect the user to a random page
+    """
+    def get(self):
+        sql_cursor = SQL_CON.cursor()
+        chosen = random.choice(db.get_thread_postnames(sql_cursor))
+        sql_cursor.close()
+
+        self.redirect('/posts/{}/'.format(chosen))
+
 def make_app():
     return tornado.web.Application([
         # it is mandatory that requests to these are made via JS queries
+
+        # redirect to random blogpost
+        (r"/random/", RandomRedirect),
 
         # retrieve, attempt captchas
         (r"/captcha/([^/]+)/", RequestCaptcha),

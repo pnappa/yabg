@@ -4,7 +4,8 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS threads(
     id          INTEGER PRIMARY KEY,
-    created     DATE DEFAULT (DATETIME('now')) -- when was the blog post made?
+    created     DATE DEFAULT (DATETIME('now')), -- when was the blog post made?
+    postname    TEXT NOT NULL                   -- the post's name in the URL -> post is @ /posts/$postname/
 );
 
 CREATE TABLE IF NOT EXISTS comments(

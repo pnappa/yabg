@@ -126,3 +126,7 @@ def submit_post(sql_cursor, thread_id, captcha_id, title, author_name, comment_b
         raise Exception("token invalidation routine not functioning...")
 
     return comment_id
+
+def get_thread_postnames(sql_cursor):
+    sql_cursor.execute("SELECT postname FROM threads;")
+    return list([a[0] for a in sql_cursor.fetchall()])
