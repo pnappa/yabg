@@ -21,9 +21,39 @@
         <noscript>¡ we need js to display these comments ! <br>...yeah we use ajax and stuff to fetch and post comments</noscript>
         <!-- probably put some button up to load the comment box? its gotta request a captcha somehow -->
         <div id="comments">
+            <!-- clicking this will unfold the comment form, and request a captcha -->
+            <div onclick="opencomment();">write a comment!</div>
+            <div id="startpostcomment">
+                <label for="title">Title:</label>
+                <input name="title" required>
+
+                <label for="name">Name:</label>
+                <input name="name" required>
+
+                <label for="email">Email (optional):</label>
+                <input name="email">
+
+                <label for="body">Comment:</label>
+                <input name="body" required>
+
+                <div id="captcha">
+                    Captcha:
+                    <!-- loading spinner --> 
+                    <div id="captchaspinner" class="lds-ring"><div></div><div></div><div></div><div></div></div>
+                    <!-- when the captcha loads from the server, this form is populated -->
+                    <div id="captchaloaded">
+                        <div id="question"></div>
+                        <input id="captchaid"></input>
+                        <label for="captchaanswer">Answer</label>
+                        <input name="captchaanswer">
+                        <button onclick="submitComment()">Submit</button>
+                    </div>
+                </div>
+            </div>
             <h1>Comments</h1>
             <a name="comments"></a>
             <!-- loaded comments are inserted here on the client -->
+            <div id="commentbox"></div>
         </div>
     </footer>
 </article>

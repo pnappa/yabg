@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% for post in posts %}
+<article id="post">
+    <header> 
+        <h1>{{ post["title"] }}</h1>
+        <time>Written: {{ post["postdate"] }}</time>
+        <span class="author">Author: {{ post["author"] }}</span>
+    </header>
+    {# need to mark it as safe, because the markdown generator generates html! #}
+    {{ post["content"]|safe }} 
+
+    <footer>
+        {# TODO: insert some JS into the page that will auto fill the commentcount feature #}
+        <a href="/posts/{{post['postname']}}/#comments">view comments</a><span id="commentcount"></span>
+    </footer>
+</article>
+{% endfor %}
+
+<!-- TODO: prev, next, and page number links/text -->
+
+{% endblock %}
+

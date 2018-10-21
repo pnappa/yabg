@@ -219,7 +219,7 @@ def post_comment(sql_cursor, thread_id, request_json, captcha_token):
     title, comment_body, author_name = post_json["title"], post_json["body"], post_json["name"]
     # optional email field, argon2 hash it
     email = post_json["email"] if "email" in post_json else None
-    email_hash = hash_email(email)
+    email_hash = hash_email(email) if email is not None else None
 
     # TODO: get ip address to store
 

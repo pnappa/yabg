@@ -62,6 +62,7 @@ def check_csrf(func):
             print("auth headerfail")
             return fail(self)
 
+        # TODO: this might not be fully accurate! it doesn't seem to catch different ports - which are cross domain!!
         # origin or referer must match my site
         received_hostything = self.request.headers.get(
             'Origin') or self.request.headers.get('Referer')
@@ -217,6 +218,10 @@ def make_app():
         (r"/comments/(.+)/delete/(.+)/", ProcessDeletion),
 
         # (r"/comments/(.+)/(.+)/", AdminMessage planned to allow me to modify/delete messages
+
+
+        # XXX: development fallback to serve the generated files
+        (r'/(.*)', tornado.web.StaticFileHandler, {'path': '../site-generator/generated/', "default_filename": "index.html"}),
     ])
 
 

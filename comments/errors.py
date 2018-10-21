@@ -47,4 +47,4 @@ class InvalidTokenError(CommentException):
 class InvalidPostError(CommentException):
     def __init__(self, post_json):
         super().__init__(errno=9, status_code=400,
-                         err_msg="missing/malformed post - are you missing mandatory fields?")
+                err_msg="missing/malformed post - are you missing mandatory fields? received: {}".format(post_json))

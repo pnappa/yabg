@@ -126,8 +126,8 @@ def find_posts(directory):
     # walk through, parse the markdown fields (probably the main one will be called main.md)
     post_metadata = []
     for root, _, files in walklevel(directory, level=1):
-        # ignore hidden files or the top level
-        if root[root.rfind(os.path.sep)+1] == '.' or root == directory:
+        # ignore hidden files or the top level (suffixed with ~ also means ignore)
+        if root[root.rfind(os.path.sep)+1] == '.' or root == directory or root[-1] == '~':
             continue
 
         if "main.md" not in files:
@@ -185,6 +185,8 @@ def dump_html(html, outfile):
     html = re.sub(r'<p>\s*</p>', '', html)
     # TODO: minify
 
+    info('dumping html for {}'.format(outfile))
+
     # create the nested folder if it doesn't exist already
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
 
@@ -225,7 +227,26 @@ def generate_post_list(posts, outfile):
 def generate_front_page(posts, outfile):
     # generate the landing page with the provided posts
 
+    # currently the front page is just the first chunk.
+    # so, symlink it is!
+    os.symlink('./chunks/1/index.html', outfile)
+
+def generate_chunks(posts, outdir, num_per_chunk=10):
+    info('generating chunks')
     sorted_posts = date_sorted(posts)
+
+    for ind in range(0, len(posts), num_per_chunk):
+        chunk_subset = sorted_posts[ind*num_per_chunk:(ind+1)*num_per_chunk]
+
+        for i,post in enumerate(chunk_subset):
+            md = markdown.Markdown()
+            with open(post["filename"], 'r') as mdIn:
+                post["content"] = md.convert("".join(mdIn.readlines()))
+
+        template = JINJAENV.get_template('chunk.html')
+        chunk_html = template.render(posts=chunk_subset)
+
+        dump_html(chunk_html, '{}/{}/index.html'.format(outdir, (ind // num_per_chunk)+1))
 
 if __name__ == "__main__":
     # TODO, configuration
@@ -247,12 +268,13 @@ if __name__ == "__main__":
 
     generate_post_list(posts, './generated/posts/index.html')
 
+    generate_chunks(posts, './generated/chunks')
+
     generate_front_page(posts, './generated/index.html')
 
     # copy static files to the generated dir
     resource_dir = os.path.join(os.getcwd(),'resources/')
     src_files = os.listdir(resource_dir)
-    print(src_files)
     for filename in src_files:
         fullfilename = os.path.join(resource_dir, filename)
         if os.path.isfile(fullfilename):
