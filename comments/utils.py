@@ -237,3 +237,8 @@ def get_comments(sql_cursor, thread_id, since_comment_id):
 
     # XXX: do we need to check if since_comment_id is valid..?
     return 200, {"comments": db.comments_since(sql_cursor, thread_id, since_comment_id)}
+
+
+@request_wrapper
+def create_delete_token(sql_cursor, thread_id, comment_id):
+    raise NotImplementedError("unimplemented lol")

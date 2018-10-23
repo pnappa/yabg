@@ -235,6 +235,7 @@ def generate_chunks(posts, outdir, num_per_chunk=10):
     info('generating chunks')
     sorted_posts = date_sorted(posts)
 
+    # split up the posts into pages with a certain number per page.
     for ind in range(0, len(posts), num_per_chunk):
         chunk_subset = sorted_posts[ind*num_per_chunk:(ind+1)*num_per_chunk]
 

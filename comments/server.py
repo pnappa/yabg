@@ -20,6 +20,7 @@
             - why? to ensure that user's can't really copy-cat each other easily, but still reduce the entropy
               so that you can't infer someone's IP address via their username colour.
     TODO: replace email HMAC with argon2 hash
+            - well, now i need to test this!
     TODO: add some revision functionality
             - what i mean by this is that users can view previous editions of each blog post. This seems nice and novel.
             - i suppose this wouldn't be part of this, but instead static file generation, and the front end would pull/display data from that based on the front-end UIs settings.
@@ -155,7 +156,7 @@ class MessageHandler(tornado.web.RequestHandler):
 
 class RequestDeleteToken(tornado.web.RequestHandler):
     """
-    Handling for /comments/THREADID/requestdelete/COMMENTID
+    Handling for /comments/THREADID/requestdelete/COMMENTID/
 
     This will send a email to the user if the provided email matches the stored email for that comment.
     The email will contain a link to delete the post.

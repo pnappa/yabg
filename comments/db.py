@@ -88,10 +88,10 @@ def get_token_hash(sql_cursor, captcha_id):
 def comments_since(sql_cursor, thread_id, since_comment_id):
     ret_comments = []
     sql_cursor.execute(
-        "SELECT id, title, commentbody, author_name FROM comments WHERE thread_id=? AND id > ?;", (thread_id, since_comment_id))
+        "SELECT id, title, commentbody, author_name, created FROM comments WHERE thread_id=? AND id > ?;", (thread_id, since_comment_id))
     for row in sql_cursor.fetchall():
         ret_comments.append(
-            {"comment_id": row[0], "title": row[1], "body": row[2], "name": row[3]})
+                {"comment_id": row[0], "title": row[1], "body": row[2], "name": row[3], "posted": row[4]})
 
     return ret_comments
 
