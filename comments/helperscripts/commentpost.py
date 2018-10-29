@@ -29,4 +29,11 @@ token = r["key"]["token"]
 r = requests.post("http://localhost:10001/comments/{}/".format(threadid), headers={**headers, 'X-Token': token}, json={"captcha_id": captcha_id, "post": {"title": title, "name": name, "email": email, "body": postbody}})
 print(r)
 print(r.json())
+comment_id = str(r.json()["comment_id"])
+
+
+# request the delete token for comment for the hello world post where i just posted (for the moment, this is hardcoded)
+r = requests.post("http://localhost:10001/comments/" + threadid + "/requestdelete/" + comment_id +"/", headers=headers, json={"email": email})
+print(r)
+print(r.json())
 

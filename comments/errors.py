@@ -27,6 +27,10 @@ class NonExistentCaptchaError(CommentException):
         super().__init__(errno=7, status_code=400,
                          err_msg="invalid captcha id {0}".format(captcha_id))
 
+class NonExistentCommentError(CommentException):
+    def __init__(self, comment_id, thread_id):
+        super().__init__(errno=6, status_code=400,
+                         err_msg="invalid comment id {0} for thread {1}".format(comment_id, thread_id))
 
 class NonExistentAnswerError(CommentException):
     def __init__(self):
@@ -48,3 +52,10 @@ class InvalidPostError(CommentException):
     def __init__(self, post_json):
         super().__init__(errno=9, status_code=400,
                 err_msg="missing/malformed post - are you missing mandatory fields? received: {}".format(post_json))
+
+
+class InvalidEmailError(CommentException):
+    def __init__(self):
+        super().__init__(errno=4, status_code=403,
+                err_msg="invalid/missing email")
+

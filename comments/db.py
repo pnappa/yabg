@@ -130,3 +130,22 @@ def submit_post(sql_cursor, thread_id, captcha_id, title, author_name, comment_b
 def get_thread_postnames(sql_cursor):
     sql_cursor.execute("SELECT postname FROM threads;")
     return list([a[0] for a in sql_cursor.fetchall()])
+
+
+def comment_exists(sql_cursor, comment_id, thread_id):
+    sql_cursor.execute("SELECT EXISTS(SELECT 1 FROM comments WHERE id=? AND thread_id=?);", (comment_id, thread_id))
+    return sql_cursor.fetchone()[0] == 1
+
+
+def get_delete_email_hash(sql_cursor, email, comment_id, thread_id):
+    sql_cursor.execute("SELECT emailhash FROM comments WHERE id=? AND thread_id=?", (comment_id, thread_id))
+    # check if the email hash was even stored
+    res = sql_cursor.fetchone()
+    if res[0] is None:
+        return None
+    return res[0]
+
+
+def store_delete_token(sql_cursor, del_token_id, del_token_sec, comment_id, thread_id):
+    sql_cursor.execute("INSERT INTO deletetokens(id, secret, comment_id, thread_id) VALUES(?, ?, ?, ?);", (del_token_id, del_token_sec, comment_id, thread_id))
+

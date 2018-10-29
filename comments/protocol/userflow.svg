@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="116cm" height="152cm" viewBox="-442 -130 2312 3038" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="Background">
+    <text font-size="22.9616" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="330" y="234.5">
+      <tspan x="330" y="234.5"></tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #523fff" x="196" y="149" width="273" height="81" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="332.5" y="185.4">
+        <tspan x="332.5" y="185.4">POST</tspan>
+        <tspan x="332.5" y="201.4">/captcha/:THREADID/</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="399.1" y="338" width="273" height="183" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="407.6" y="361.4">
+        <tspan x="407.6" y="361.4">status: 200</tspan>
+        <tspan x="407.6" y="377.4">content-type: application/json</tspan>
+        <tspan x="407.6" y="393.4"></tspan>
+        <tspan x="407.6" y="409.4">{</tspan>
+        <tspan xml:space="preserve" x="407.6" y="425.4">  id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="407.6" y="441.4">  captcha: {</tspan>
+        <tspan xml:space="preserve" x="407.6" y="457.4">    type: "text",</tspan>
+        <tspan xml:space="preserve" x="407.6" y="473.4">    hint: "what is the value of 5+two?"</tspan>
+        <tspan xml:space="preserve" x="407.6" y="489.4">  }</tspan>
+        <tspan x="407.6" y="505.4">}</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="-20.9" y="336" width="273" height="183" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-12.4" y="383.4">
+        <tspan x="-12.4" y="383.4">status: 404? (maybe another code?)</tspan>
+        <tspan x="-12.4" y="399.4">content-type: application/json</tspan>
+        <tspan x="-12.4" y="415.4"></tspan>
+        <tspan x="-12.4" y="431.4">{</tspan>
+        <tspan xml:space="preserve" x="-12.4" y="447.4">  errno: 1,</tspan>
+        <tspan xml:space="preserve" x="-12.4" y="463.4">  error: "thread does not exist"</tspan>
+        <tspan x="-12.4" y="479.4">}</tspan>
+      </text>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" d="M 332.5 230 C 354,299 535,268 535.501,326.5"/>
+      <polygon style="fill: #00ff00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" fill-rule="evenodd" points="530.502,326.543 535.587,336.5 540.501,326.458 "/>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 332.5 230 C 330,272 120,250 116.188,324.515"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="111.194,324.26 115.677,334.502 121.181,324.771 "/>
+    </g>
+    <text font-size="17.193" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="-51" y="269">
+      <tspan x="-51" y="269">THREADID doesn't exist</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="310" y="303">
+      <tspan x="310" y="303">THREADID exists</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="744.976" y="337" width="301.25" height="183" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="753.476" y="376.4">
+        <tspan x="753.476" y="376.4">status: 429</tspan>
+        <tspan x="753.476" y="392.4">content-type: application/json</tspan>
+        <tspan x="753.476" y="408.4">Retry-After: TIME+10Mins</tspan>
+        <tspan x="753.476" y="424.4"></tspan>
+        <tspan x="753.476" y="440.4">{</tspan>
+        <tspan xml:space="preserve" x="753.476" y="456.4">  errno: 2</tspan>
+        <tspan xml:space="preserve" x="753.476" y="472.4">  error: "too many requests, try again later"</tspan>
+        <tspan x="753.476" y="488.4">}</tspan>
+      </text>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 332.5 230 C 353,286.25 892,265.25 895.024,325.514"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="890.03,325.765 895.525,335.502 900.017,325.264 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="515" y="258.25">
+      <tspan x="515" y="258.25">throttled, too many requests</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #0000ff" x="397.21" y="653.008" width="273" height="183" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="405.71" y="708.408">
+        <tspan x="405.71" y="708.408">POST /captcha/:THREADID/solve/</tspan>
+        <tspan x="405.71" y="724.408"></tspan>
+        <tspan x="405.71" y="740.408">{</tspan>
+        <tspan xml:space="preserve" x="405.71" y="756.408">  id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="405.71" y="772.408">  answer: "7"</tspan>
+        <tspan x="405.71" y="788.408">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke-dasharray: 4; stroke: #000000" x1="535.6" y1="521" x2="533.875" y2="641.509"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #000000" fill-rule="evenodd" points="528.875,641.438 533.731,651.508 538.874,641.581 "/>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 465.46 836.008 C 280.708,1103.38 406.708,408.376 263.513,426.088"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="262.899,421.126 253.589,427.316 264.127,431.05 "/>
+    </g>
+    <text font-size="17.193" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="124.309" y="657.226">
+      <tspan x="124.309" y="657.226">THREADID doesn't exist!</tspan>
+      <tspan x="124.309" y="678.717">or.. it was hidden/deleted</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="377.802" y="-24.9048">
+      <tspan x="377.802" y="-24.9048">Too many requests: &gt;10 for that IP,UserAgent combo, &gt;30 for that IP within the last 10 mins</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="378.534" y="947.626" width="315.55" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="387.034" y="971.026">
+        <tspan x="387.034" y="971.026">status: 200</tspan>
+        <tspan x="387.034" y="987.026">content-type: application/json</tspan>
+        <tspan x="387.034" y="1003.03"></tspan>
+        <tspan x="387.034" y="1019.03">{</tspan>
+        <tspan xml:space="preserve" x="387.034" y="1035.03">  id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="387.034" y="1051.03">  status: "ok",</tspan>
+        <tspan xml:space="preserve" x="387.034" y="1067.03">  key: {</tspan>
+        <tspan xml:space="preserve" x="387.034" y="1083.03">    token: 256bit random key,</tspan>
+        <tspan xml:space="preserve" x="387.034" y="1099.03">    expiry: timestamp (rfc3339, TIME+10mins)</tspan>
+        <tspan xml:space="preserve" x="387.034" y="1115.03">  }</tspan>
+        <tspan x="387.034" y="1131.03">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" x1="533.71" y1="836.008" x2="536.04" y2="936.129"/>
+      <polygon style="fill: #00ff00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" fill-rule="evenodd" points="531.042,936.245 536.273,946.126 541.039,936.013 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="546.708" y="901.876">
+      <tspan x="546.708" y="901.876">correct answer &amp; </tspan>
+      <tspan x="546.708" y="923.522">id is not stale &amp; exists</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="760.808" y="949.876" width="315.55" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="769.308" y="1005.28">
+        <tspan x="769.308" y="1005.28">status: 200</tspan>
+        <tspan x="769.308" y="1021.28">content-type: application/json</tspan>
+        <tspan x="769.308" y="1037.28"></tspan>
+        <tspan x="769.308" y="1053.28">{</tspan>
+        <tspan xml:space="preserve" x="769.308" y="1069.28">  id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="769.308" y="1085.28">  status: "try again",</tspan>
+        <tspan x="769.308" y="1101.28">}</tspan>
+      </text>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff8f00" d="M 601.96 836.008 C 863.708,859.626 911.708,916.626 916.255,938.614"/>
+      <polygon style="fill: #ff8f00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff8f00" fill-rule="evenodd" points="911.359,939.627 918.28,948.407 921.152,937.602 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="754.358" y="886.892">
+      <tspan x="754.358" y="886.892">invalid guess, not too many requests</tspan>
+      <tspan x="754.358" y="908.538">we let them try again on the same captcha </tspan>
+    </text>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #000000" d="M 1076.36 1049.38 C 1348.71,490.876 652.708,547.876 606.959,642.651"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #000000" fill-rule="evenodd" points="602.456,640.478 602.612,651.657 611.462,644.825 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="1187.87" y="956.28" width="315.55" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1196.37" y="1011.68">
+        <tspan x="1196.37" y="1011.68">status: 200</tspan>
+        <tspan x="1196.37" y="1027.68">content-type: application/json</tspan>
+        <tspan x="1196.37" y="1043.68"></tspan>
+        <tspan x="1196.37" y="1059.68">{</tspan>
+        <tspan xml:space="preserve" x="1196.37" y="1075.68">  id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="1196.37" y="1091.68">  status: "restart",</tspan>
+        <tspan x="1196.37" y="1107.68">}</tspan>
+      </text>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #000000" d="M 1503.42 1055.78 C 1753.06,447.94 1357.15,306.74 1298.55,254.304 C 1239.94,201.868 690.988,26.5034 479.069,143.444"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #000000" fill-rule="evenodd" points="476.653,139.066 470.313,148.275 481.484,147.822 "/>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 670.21 836.008 C 894.454,836.008 1229.39,681.708 1341.16,945.69"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1336.56,947.64 1345.06,954.899 1345.77,943.741 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="1234.02" y="788.12">
+      <tspan x="1234.02" y="788.12">too many attempts on this hint/is stale</tspan>
+      <tspan x="1234.02" y="809.766">ask the client to request a new captcha</tspan>
+      <tspan x="1234.02" y="831.413">increment attempts</tspan>
+      <tspan x="1234.02" y="853.059">invalidate captcha_id</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #0000ff" x="483.394" y="1284.33" width="273" height="215" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="491.894" y="1307.73">
+        <tspan x="491.894" y="1307.73">POST /comments/:THREADID/</tspan>
+        <tspan x="491.894" y="1323.73">X-Token: 256bit key (from captcha)</tspan>
+        <tspan x="491.894" y="1339.73"></tspan>
+        <tspan x="491.894" y="1355.73">{</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1371.73">  captcha_id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1387.73">  post: {</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1403.73">    title: "comment title".</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1419.73">    name: "anonymouse",</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1435.73">    email: "me@pat.sh", // optional</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1451.73">    body: "here is my comment... etc"</tspan>
+        <tspan xml:space="preserve" x="491.894" y="1467.73">  }</tspan>
+        <tspan x="491.894" y="1483.73">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke-dasharray: 4; stroke: #000000" x1="536.308" y1="1146.63" x2="613.927" y2="1274.5"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #000000" fill-rule="evenodd" points="609.653,1277.09 619.116,1283.05 618.201,1271.9 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="573.352" y="1608.18" width="330.5" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="581.852" y="1655.58">
+        <tspan x="581.852" y="1655.58">status: 403</tspan>
+        <tspan x="581.852" y="1671.58">content-type: application/json</tspan>
+        <tspan x="581.852" y="1687.58"></tspan>
+        <tspan x="581.852" y="1703.58">{</tspan>
+        <tspan xml:space="preserve" x="581.852" y="1719.58">  captcha_id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="581.852" y="1735.58">  errorno: 3,</tspan>
+        <tspan xml:space="preserve" x="581.852" y="1751.58">  error: "invalid token"</tspan>
+        <tspan x="581.852" y="1767.58">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" x1="619.894" y1="1499.33" x2="319.718" y2="1605.64"/>
+      <polygon style="fill: #00ff00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" fill-rule="evenodd" points="318.049,1600.92 310.292,1608.98 321.387,1610.35 "/>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="619.894" y1="1499.33" x2="730.126" y2="1600.41"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="726.747,1604.09 737.496,1607.16 733.505,1596.72 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #0000ff" x="105.84" y="2009.12" width="400.65" height="74.3648" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="114.34" y="2042.2">
+        <tspan x="114.34" y="2042.2">GET /comments/:THREADID/?since=LASTCOMMENTIDSEEN</tspan>
+        <tspan x="114.34" y="2058.2"></tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke-dasharray: 4; stroke: #000000" x1="307.965" y1="1809.97" x2="306.27" y2="1997.62"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #000000" fill-rule="evenodd" points="301.27,1997.58 306.18,2007.62 311.27,1997.67 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="596.12" y="1846.49">
+      <tspan x="596.12" y="1846.49">XXX: at this point, the user will probably request another captcha?</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="147.619" y="2161.16" width="330.5" height="247" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="156.119" y="2184.56">
+        <tspan x="156.119" y="2184.56">status: 200</tspan>
+        <tspan x="156.119" y="2200.56">content-type: application/json</tspan>
+        <tspan x="156.119" y="2216.56"></tspan>
+        <tspan x="156.119" y="2232.56">{</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2248.56">  comments: [</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2264.56">    {</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2280.56">       comment_id: COMMENTID,</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2296.56">       title: etc</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2312.56">       body: etc</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2328.56">       name: etc</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2344.56">       posted: etc</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2360.56">       // email is not published!</tspan>
+        <tspan xml:space="preserve" x="156.119" y="2376.56">  ]</tspan>
+        <tspan x="156.119" y="2392.56">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" x1="306.166" y1="2083.48" x2="311.88" y2="2149.7"/>
+      <polygon style="fill: #00ff00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" fill-rule="evenodd" points="306.899,2150.13 312.74,2159.67 316.862,2149.27 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="203.12" y="1453.24">
+      <tspan x="203.12" y="1453.24">threadID doesn't exist</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="628.136" y="1567.26">
+      <tspan x="628.136" y="1567.26">invalid/expired token</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="596.594" y="1222.7">
+      <tspan x="596.594" y="1222.7">client will probably submit post</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="414.162" y="595.502">
+      <tspan x="414.162" y="595.502">client will probably solve</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="811.544" y="1408.39">
+      <tspan x="811.544" y="1408.39">email is used to allow comment deletion.</tspan>
+    </text>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 105.84 2064.9 C 17.5672,2064.9 -568.726,775.314 -30.9706,478.803"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="-28.5563,483.181 -22.2136,473.974 -33.3848,474.424 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="-123.312" y="2043.3">
+      <tspan x="-123.312" y="2043.3">threadID doesn't exist</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #0000ff" x="843.994" y="1997.8" width="408.6" height="103" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="852.494" y="2021.2">
+        <tspan x="852.494" y="2021.2">POST /comments/:THREADID/requestdelete/:COMMENTID/</tspan>
+        <tspan x="852.494" y="2037.2">{</tspan>
+        <tspan xml:space="preserve" x="852.494" y="2053.2">  email: "me@pat.sh"  // required</tspan>
+        <tspan x="852.494" y="2069.2">}</tspan>
+        <tspan x="852.494" y="2085.2"></tspan>
+      </text>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="1269.03" y="2022.18">
+      <tspan x="1269.03" y="2022.18">a user is able to request deletion of a post</tspan>
+      <tspan x="1269.03" y="2043.83">if they know the email.</tspan>
+      <tspan x="1269.03" y="2065.47">if they provided the correct email for that id, </tspan>
+      <tspan x="1269.03" y="2087.12">then, we send a magic link to them that deletes it</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="747.258" y="2228.4" width="330.5" height="119" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="755.758" y="2251.8">
+        <tspan x="755.758" y="2251.8">status: 200</tspan>
+        <tspan x="755.758" y="2267.8">content-type: application/json</tspan>
+        <tspan x="755.758" y="2283.8"></tspan>
+        <tspan x="755.758" y="2299.8">{</tspan>
+        <tspan xml:space="preserve" x="755.758" y="2315.8">  "success": "success"</tspan>
+        <tspan x="755.758" y="2331.8">}</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="1159.03" y="2216.94" width="330.5" height="135" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1167.53" y="2240.34">
+        <tspan x="1167.53" y="2240.34">status: 403</tspan>
+        <tspan x="1167.53" y="2256.34">content-type: application/json</tspan>
+        <tspan x="1167.53" y="2272.34"></tspan>
+        <tspan x="1167.53" y="2288.34">{</tspan>
+        <tspan xml:space="preserve" x="1167.53" y="2304.34">  errno: 4,</tspan>
+        <tspan xml:space="preserve" x="1167.53" y="2320.34">  "error": "invalid email"</tspan>
+        <tspan x="1167.53" y="2336.34">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="1048.29" y1="2100.8" x2="1313.68" y2="2212.48"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1311.74,2217.09 1322.89,2216.36 1315.62,2207.87 "/>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" x1="1048.29" y1="2100.8" x2="920.888" y2="2220.52"/>
+      <polygon style="fill: #00ff00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" fill-rule="evenodd" points="917.464,2216.88 913.601,2227.37 924.312,2224.17 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #0000ff" x="679.862" y="2513.34" width="472.45" height="103" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="688.362" y="2568.74">
+        <tspan x="688.362" y="2568.74">GET /comments/:THREADID/delete/:COMMENTID/?deltoken=XXX.YYY</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke-dasharray: 4; stroke: #000000" x1="913.477" y1="2348.9" x2="915.905" y2="2501.84"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #000000" fill-rule="evenodd" points="910.906,2501.92 916.064,2511.84 920.905,2501.76 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="940.076" y="2418.52">
+      <tspan x="940.076" y="2418.52">we send that user an email, with the following link</tspan>
+      <tspan x="940.076" y="2440.17">note, that the deltoken is a fullstop separated string:</tspan>
+      <tspan x="940.076" y="2461.81">DELTOKENID.DELTOKEN</tspan>
+      <tspan x="940.076" y="2483.46">we use the id to avoid timing attacks in the DB</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="994.01" y="2770.1" width="330.5" height="135" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1002.51" y="2793.5">
+        <tspan x="1002.51" y="2793.5">status: 403</tspan>
+        <tspan x="1002.51" y="2809.5">content-type: application/json</tspan>
+        <tspan x="1002.51" y="2825.5"></tspan>
+        <tspan x="1002.51" y="2841.5">{</tspan>
+        <tspan xml:space="preserve" x="1002.51" y="2857.5">  errno: 5,</tspan>
+        <tspan xml:space="preserve" x="1002.51" y="2873.5">  "error": "denied"</tspan>
+        <tspan x="1002.51" y="2889.5">}</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="551.398" y="2771.66" width="330.5" height="135" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="559.898" y="2803.06">
+        <tspan x="559.898" y="2803.06">status: 200</tspan>
+        <tspan x="559.898" y="2819.06">content-type: application/json</tspan>
+        <tspan x="559.898" y="2835.06"></tspan>
+        <tspan x="559.898" y="2851.06">{</tspan>
+        <tspan xml:space="preserve" x="559.898" y="2867.06">  "sucess": "message deleted"</tspan>
+        <tspan x="559.898" y="2883.06">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" x1="916.088" y1="2616.34" x2="725.721" y2="2764.59"/>
+      <polygon style="fill: #00ff00; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #00ff00" fill-rule="evenodd" points="722.649,2760.65 717.831,2770.74 728.793,2768.54 "/>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="916.088" y1="2616.34" x2="1149.54" y2="2763.95"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1146.87,2768.18 1157.99,2769.3 1152.21,2759.73 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="1594.96" y="2198.72" width="273" height="183" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1603.46" y="2246.12">
+        <tspan x="1603.46" y="2246.12">status: 404? (maybe another code?)</tspan>
+        <tspan x="1603.46" y="2262.12">content-type: application/json</tspan>
+        <tspan x="1603.46" y="2278.12"></tspan>
+        <tspan x="1603.46" y="2294.12">{</tspan>
+        <tspan xml:space="preserve" x="1603.46" y="2310.12">  errno: 6,</tspan>
+        <tspan xml:space="preserve" x="1603.46" y="2326.12">  error: "comment does not exist"</tspan>
+        <tspan x="1603.46" y="2342.12">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="1048.29" y1="2100.8" x2="1720.07" y2="2197.09"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1719.36,2202.04 1729.97,2198.51 1720.78,2192.14 "/>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 922.548 2618.62 C 1645.84,2928.62 1371.72,2290.22 1583.46,2290.22"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1583.46,2295.22 1593.46,2290.22 1583.46,2285.22 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="711.266" y="2694.2">
+      <tspan x="711.266" y="2694.2">success</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="924.09" y="2723.5">
+      <tspan x="924.09" y="2723.5">invalid token</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="1362.08" y="2703.46">
+      <tspan x="1362.08" y="2703.46">invalid comment id</tspan>
+    </text>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 797.974 2616.34 C -442.034,2673.46 -634.684,862.312 -29.9548,388.839"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="-26.8724,392.776 -22.0811,382.675 -33.0372,384.903 "/>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 843.994 2100.8 C 167.179,1985.49 -275.546,771.932 -28.361,482.001"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="-24.5561,485.245 -21.8732,474.391 -32.1659,478.757 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="143.627" y="1609.48" width="330.5" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="152.127" y="1664.88">
+        <tspan x="152.127" y="1664.88">status: 200</tspan>
+        <tspan x="152.127" y="1680.88">content-type: application/json</tspan>
+        <tspan x="152.127" y="1696.88"></tspan>
+        <tspan x="152.127" y="1712.88">{</tspan>
+        <tspan xml:space="preserve" x="152.127" y="1728.88">  captcha_id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="152.127" y="1744.88">  commentid: the comment that you just posted</tspan>
+        <tspan x="152.127" y="1760.88">}</tspan>
+      </text>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="260.118" y="1573.21">
+      <tspan x="260.118" y="1573.21">valid captchatoken , etc.</tspan>
+    </text>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 551.644 1499.33 C -95.7312,1625.45 -340.004,542.21 -31.722,431.39"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="-30.0306,436.095 -22.3116,428.007 -33.4134,426.685 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="86.5214" y="1872.96">
+      <tspan x="86.5214" y="1872.96">client probably will see if there's new comments</tspan>
+      <tspan x="86.5214" y="1894.6">(lol are you implying its gonna be that active)</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="688.354" y="2135.28">
+      <tspan x="688.354" y="2135.28">thread ID doesn't exist</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="472.438" y="2573.66">
+      <tspan x="472.438" y="2573.66">thread ID doesn't exist</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="206.358" y="2128.9">
+      <tspan x="206.358" y="2128.9">if ID hasn't been seen, just return all results</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="240.916" y="-113.12">
+      <tspan x="240.916" y="-113.12">Note: updated the 201 statuses to 200 - a compliant REST interface should return the object in the header, which</tspan>
+      <tspan x="240.916" y="-91.4738">doesn't seem doable for something like captcha requesting. like what's the point, hence the change to a 200</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="-66.0856" y="944.322" width="315.55" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-57.5856" y="999.722">
+        <tspan x="-57.5856" y="999.722">status: 400</tspan>
+        <tspan x="-57.5856" y="1015.72">content-type: application/json</tspan>
+        <tspan x="-57.5856" y="1031.72"></tspan>
+        <tspan x="-57.5856" y="1047.72">{</tspan>
+        <tspan xml:space="preserve" x="-57.5856" y="1063.72">  errno: 7,</tspan>
+        <tspan xml:space="preserve" x="-57.5856" y="1079.72">  error: "invalid captcha id"</tspan>
+        <tspan x="-57.5856" y="1095.72">}</tspan>
+      </text>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 465.46 836.008 C 290.636,884.464 92.1844,904.646 91.8329,932.823"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="86.8333,932.761 91.7081,942.822 96.8325,932.885 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="989.644" y="1604.21" width="330.5" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="998.144" y="1651.61">
+        <tspan x="998.144" y="1651.61">status: 400</tspan>
+        <tspan x="998.144" y="1667.61">content-type: application/json</tspan>
+        <tspan x="998.144" y="1683.61"></tspan>
+        <tspan x="998.144" y="1699.61">{</tspan>
+        <tspan xml:space="preserve" x="998.144" y="1715.61">  captcha_id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="998.144" y="1731.61">  errorno: 8,</tspan>
+        <tspan xml:space="preserve" x="998.144" y="1747.61">  error: "missing token"</tspan>
+        <tspan x="998.144" y="1763.61">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="688.144" y1="1499.33" x2="1143.67" y2="1601.69"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1142.58,1606.57 1153.43,1603.89 1144.77,1596.81 "/>
+    </g>
+    <g>
+      <path style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" d="M 551.644 1499.33 C 406.926,1679.33 349.788,1043.82 260.964,1043.82"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="260.964,1038.82 250.964,1043.82 260.964,1048.82 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="277.428" y="1305.12">
+      <tspan x="277.428" y="1305.12">captcha ID doesn't</tspan>
+      <tspan x="277.428" y="1326.77">map to thread id/doesn't</tspan>
+      <tspan x="277.428" y="1348.41">exist</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="1413.72" y="1603.29" width="330.5" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1422.22" y="1650.69">
+        <tspan x="1422.22" y="1650.69">status: 400</tspan>
+        <tspan x="1422.22" y="1666.69">content-type: application/json</tspan>
+        <tspan x="1422.22" y="1682.69"></tspan>
+        <tspan x="1422.22" y="1698.69">{</tspan>
+        <tspan xml:space="preserve" x="1422.22" y="1714.69">  captcha_id: 128bit ID,</tspan>
+        <tspan xml:space="preserve" x="1422.22" y="1730.69">  errorno: 9,</tspan>
+        <tspan xml:space="preserve" x="1422.22" y="1746.69">  error: "malformed post"</tspan>
+        <tspan x="1422.22" y="1762.69">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="688.144" y1="1499.33" x2="1567.55" y2="1601.96"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="1566.97,1606.92 1577.48,1603.12 1568.13,1596.99 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="927.862" y="1568.32">
+      <tspan x="927.862" y="1568.32">didn't provide</tspan>
+      <tspan x="927.862" y="1589.97">X-Token</tspan>
+    </text>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="1174.24" y="1543.1">
+      <tspan x="1174.24" y="1543.1">didn't provide the post data/or its missing required fields</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #b500ff" x="-440.44" y="939.5" width="315.55" height="199" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-431.94" y="994.9">
+        <tspan x="-431.94" y="994.9">status: 400</tspan>
+        <tspan x="-431.94" y="1010.9">content-type: application/json</tspan>
+        <tspan x="-431.94" y="1026.9"></tspan>
+        <tspan x="-431.94" y="1042.9">{</tspan>
+        <tspan xml:space="preserve" x="-431.94" y="1058.9">  errno: 10,</tspan>
+        <tspan xml:space="preserve" x="-431.94" y="1074.9">  error: "invalid answer",</tspan>
+        <tspan x="-431.94" y="1090.9">}</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" x1="465.46" y1="836.008" x2="-271.272" y2="937.924"/>
+      <polygon style="fill: #ff0000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 3; stroke: #ff0000" fill-rule="evenodd" points="-271.958,932.971 -281.178,939.294 -270.587,942.877 "/>
+    </g>
+    <text font-size="17.3172" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:CMU Serif;font-style:normal;font-weight:500" x="118.807" y="67.75">
+      <tspan x="118.807" y="67.75">TODO: change captchaid references &amp; other non-snake cased JSON keys into snakecase</tspan>
+    </text>
+  </g>
+</svg>

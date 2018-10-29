@@ -18,6 +18,8 @@ import db
 import settings
 from errors import *
 
+import email.utils
+
 def request_wrapper(func):
     """
     Decorator to refactor down that try except custom cruft that we use to simplify the requests,
@@ -77,6 +79,35 @@ def generate_captcha_token(sql_cursor, captcha_id):
     # get the expiry of newly created token
     # return it and non hashed token
     return expiry, captcha_token
+
+def generate_delete_token(sql_cursor, email, comment_id, thread_id):
+    """
+    Generates a delete token and stores it within the database.
+    ASSUMES comment_id, and thread_id ARE VALID
+    get this through your dumb skull
+    """
+
+    # TODO: check if email hashes for that comment and thread_id (and do the sleepy stuff)
+    email_hash = db.get_delete_email_hash(sql_cursor, email, comment_id, thread_id)
+    if email_hash is None:
+        # hash anyway to obscure whether the email exists anyway
+        res = argon2.verify("dingdong", settings.DUMMY_HASH)
+        return None, None
+
+    # well, looks like they provided the wrong email for the EXISTING hash
+    if not argon2.verify(email, email_hash):
+        return None, None
+
+    # generate deltoken ID and deltoken secret, SHA256 the secret, and store the two in the DB 
+    del_token_id = secrets.token_urlsafe(settings.ID_BYTES)
+    del_token_secret = secrets.token_urlsafe(settings.TOKEN_BYTES)
+    # SHA256 the secret (we'll be storing this)
+    del_token_secret_hash = hmac.new(settings.HMAC_SECRET,
+                             del_token_secret.encode('utf-8'), 'sha256').digest()
+
+    db.store_delete_token(sql_cursor, del_token_id, del_token_secret_hash, comment_id, thread_id)
+
+    return del_token_id, del_token_secret
 
 def is_post_valid(post_json):
     if post_json is None:
@@ -218,6 +249,7 @@ def post_comment(sql_cursor, thread_id, request_json, captcha_token):
 
     title, comment_body, author_name = post_json["title"], post_json["body"], post_json["name"]
     # optional email field, argon2 hash it
+    # TODO: check if valid! (potentially this https://stackoverflow.com/a/28982264 or https://stackoverflow.com/a/14485817)
     email = post_json["email"] if "email" in post_json else None
     email_hash = hash_email(email) if email is not None else None
 
@@ -240,5 +272,27 @@ def get_comments(sql_cursor, thread_id, since_comment_id):
 
 
 @request_wrapper
-def create_delete_token(sql_cursor, thread_id, comment_id):
-    raise NotImplementedError("unimplemented lol")
+def make_del_token(sql_cursor, thread_id, comment_id, request_json):
+    # we check the email was set - we don't care if the email isn't valid, because it *shouldn't* exist in the db anyway
+    # and will fail at the step of sending an email even if it somehow exists in the db
+    email = request_json["email"] if "email" in request_json else None
+    if email is None:
+        raise InvalidEmailError()
+
+    if not db.thread_exists(sql_cursor, thread_id):
+        raise NonExistentThreadError(thread_id)
+
+    if not db.comment_exists(sql_cursor, comment_id, thread_id):
+        raise NonExistentCommentError(comment_id, thread_id)
+
+    # create actual delete token (and store in DB)
+    delete_token_id, delete_token_secret = generate_delete_token(sql_cursor, email, comment_id, thread_id)
+
+    # TODO: remove
+    print("delete token id", delete_token_id, "secret:", delete_token_secret)
+
+    # TODO: send email to user (build the token string)
+    # should contain a link: https://blog.pat.sh/comments/:thread_id/delete/:comment_id/?deltoken=:delete_token_id.delete_token_secret
+    raise NotImplementedError("need to send the email to the user")
+
+    return 200, {"success": "success"}

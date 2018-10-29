@@ -16,6 +16,11 @@ import markdown
 # generating the final html
 from jinja2 import Environment, FileSystemLoader
 JINJAENV = Environment(loader=FileSystemLoader('templates'))
+# minify html
+import htmlmin
+# generate rss feed
+from lxml import etree
+BASEURL = "https://blog.pat.sh/"
 
 def warn(msg):
     logger = logging.getLogger()
@@ -192,7 +197,7 @@ def dump_html(html, outfile):
 
     # save in directory (filename)
     with open(outfile, 'w') as of:
-        of.write(html)
+        of.write(htmlmin.minify(html, remove_empty_space=True))
 
 def generate_post_html(post, outfile):
     info("generating post html for {}".format(post))
@@ -249,6 +254,69 @@ def generate_chunks(posts, outdir, num_per_chunk=10):
 
         dump_html(chunk_html, '{}/{}/index.html'.format(outdir, (ind // num_per_chunk)+1))
 
+def generate_rss(posts, outfile):
+    # we assume posts have been populated with the titles and shit & reverse chronological order..?
+    info("generating rss feed")
+    print(posts)
+
+    tree = etree.Element('rss', version="2.0")
+    channel = etree.Element("channel")
+
+    # basic blog info
+    blog_title = etree.Element('title')
+    blog_title.text = "pat's blog"
+
+    blog_desc = etree.Element("description")
+    blog_desc.text = "a shit mouthpiece for insanity"
+
+    blog_link = etree.Element("link")
+    blog_link.text = BASEURL
+
+    blog_lang = etree.Element("language")
+    blog_lang.text = "en-au"
+
+    blog_copyright = etree.Element("copyright")
+    blog_copyright.text = "what does copyright mean"
+
+    channel.append(blog_title)
+    channel.append(blog_desc)
+    channel.append(blog_link)
+    channel.append(blog_lang)
+    channel.append(blog_copyright)
+
+
+    # generate nice sorted entries for our RSS machine (CHUG CHUG)
+    for post in posts:
+        el = etree.Element('item')
+
+        title = etree.Element('title')
+        title.text = post["title"]
+
+        link = etree.Element('link')
+        link.text = BASEURL + "/posts/" + post["postname"] + "/"
+
+        desc = etree.Element('description')
+        desc.text = "i can never think of descriptions"
+
+        pub_date = etree.Element("pubDate")
+        pub_date.text = post["postdate"]
+
+        el.append(title)
+        el.append(link)
+        el.append(desc)
+        el.append(pub_date)
+
+        channel.append(el)
+
+    tree.append(channel)
+
+    start_str = '''<?xml version="1.0"?>\n'''
+    build_str = start_str + etree.tostring(tree, pretty_print=True).decode('utf-8')
+    
+    with open(outfile, 'w') as rssout:
+        rssout.write(build_str)
+
+
 if __name__ == "__main__":
     # TODO, configuration
 
@@ -273,7 +341,10 @@ if __name__ == "__main__":
 
     generate_front_page(posts, './generated/index.html')
 
+    generate_rss(posts, './generated/rss.xml')
+
     # copy static files to the generated dir
+    # TODO: ignore hidden files or whatever
     resource_dir = os.path.join(os.getcwd(),'resources/')
     src_files = os.listdir(resource_dir)
     for filename in src_files:

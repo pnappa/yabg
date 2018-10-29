@@ -72,6 +72,9 @@ CREATE TABLE IF NOT EXISTS deletetokens(
     comment_id      INTEGER NOT NULL,
     thread_id       INTEGER NOT NULL,
 
+    expiry_date     DATE DEFAULT (DATETIME('now', '+1 day')) NOT NULL,      -- expires the next day
+    created         DATE DEFAULT (DATETIME('now')), -- when was the delete token requested
+
     FOREIGN KEY(thread_id) REFERENCES threads(id) ON DELETE CASCADE,
     FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE
     );

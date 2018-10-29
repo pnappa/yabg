@@ -1,6 +1,8 @@
 
 from dotenv import load_dotenv
 import os
+# generate a fake hash so we can compare incorrect hashes anyway
+from passlib.hash import argon2
 
 # 256bits for secret key
 TOKEN_BYTES = 32
@@ -21,8 +23,10 @@ ARGON_PARAMS = {
         "rounds": None, "memory": None, "threads": None, "expected_time": None, "fuzzing_time": None
         }
 
+DUMMY_HASH = ""
+
 def init():
-    global HMAC_SECRET, EXPECTED_HOSTNAME
+    global HMAC_SECRET, EXPECTED_HOSTNAME, DUMMY_HASH
     load_dotenv(verbose=True)
     HMAC_SECRET = os.getenv("HMAC_SECRET_KEY").encode('utf-8')
     EXPECTED_HOSTNAME = os.getenv("EXPECTED_HOSTNAME")
@@ -33,3 +37,5 @@ def init():
     ARGON_PARAMS["threads"] =           int(os.getenv("ARGON_THREADS"))
     ARGON_PARAMS["expected_time"] =     int(os.getenv("ARGON_EXPECTED_TIME"))
     ARGON_PARAMS["fuzzing_time"] =      int(os.getenv("ARGON_FUZZING_TIME"))
+
+    DUMMY_HASH = argon2.hash("dummyhash")

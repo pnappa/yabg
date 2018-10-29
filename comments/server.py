@@ -166,10 +166,14 @@ class RequestDeleteToken(tornado.web.RequestHandler):
         # TODO: process whether they provided the right email.
         # I will do this after I change the email hash to use Argon2 instead of the hmac. Buuut, I really should pepper it too.
         #   probably a diff key to HMAC_SECRET_KEY though, just in case.
+        request_json = tornado.escape.json_decode(self.request.body)
 
-        self.set_status(500)
-        self.write({"error": "unimplemented"})
-        self.finish()
+        sql_cursor = SQL_CON.cursor()
+        stat_code, ret_json = utils.make_del_token(sql_cursor, thread_id, comment_id, request_json)
+        sql_cursor.close()
+
+        self.set_status(stat_code)
+        self.write(ret_json)
 
 
 class ProcessDeletion(tornado.web.RequestHandler):
