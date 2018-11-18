@@ -21,6 +21,7 @@ import htmlmin
 # generate rss feed
 from lxml import etree
 BASEURL = "https://blog.pat.sh/"
+import xml.sax.saxutils
 
 def warn(msg):
     logger = logging.getLogger()
@@ -44,7 +45,7 @@ def parse_file(filename, postname):
     
     mandatory_fields = ("title", "author") 
     # optional fields and their defaults if non-existent (none typically implies they may be generated for you.
-    optional_fields = {"postdate": None, "publish": 'false', "id": None}
+    optional_fields = {"postdate": None, "publish": 'false', "id": None, "description": None}
 
     def mini_parse(line):
         # skip empty lines
@@ -205,7 +206,9 @@ def generate_post_html(post, outfile):
     # generate the blog post body
     md = markdown.Markdown()
     with open(post["filename"], 'r') as mdIn:
-        postbody = md.convert("".join(mdIn.readlines()))
+        cont = "".join(mdIn.readlines())
+        postbody = md.convert(cont)
+        post["postbody"] = cont
 
     # chuck the post data into the template post.html
     template = JINJAENV.get_template("post.html")
@@ -246,8 +249,7 @@ def generate_chunks(posts, outdir, num_per_chunk=10):
 
         for i,post in enumerate(chunk_subset):
             md = markdown.Markdown()
-            with open(post["filename"], 'r') as mdIn:
-                post["content"] = md.convert("".join(mdIn.readlines()))
+            post["content"] = md.convert(post["postbody"])
 
         template = JINJAENV.get_template('chunk.html')
         chunk_html = template.render(posts=chunk_subset)
@@ -257,7 +259,6 @@ def generate_chunks(posts, outdir, num_per_chunk=10):
 def generate_rss(posts, outfile):
     # we assume posts have been populated with the titles and shit & reverse chronological order..?
     info("generating rss feed")
-    print(posts)
 
     tree = etree.Element('rss', version="2.0")
     channel = etree.Element("channel")
@@ -283,21 +284,37 @@ def generate_rss(posts, outfile):
     channel.append(blog_link)
     channel.append(blog_lang)
     channel.append(blog_copyright)
+    
+    # the desc will be the first non blank line (except if an explicit one is set in the metadata)
+    def getDesc(post):
+        def is_metadata(line):
+            # matching stuff like: [hello]: # (wowee)
+            return re.match(r"^\[[^\]]+\]:\s*#\s*\([^\)]*\)$", line.strip()) is not None
 
+        if post["description"] is not None:
+            return post["description"]
+
+        for l in post["postbody"].split('\n'):
+            if l.strip() == '' or is_metadata(l):
+                continue
+            return l
 
     # generate nice sorted entries for our RSS machine (CHUG CHUG)
     for post in posts:
         el = etree.Element('item')
 
+        # sanitise that sweet, sweet, title
         title = etree.Element('title')
-        title.text = post["title"]
+        title.text = xml.sax.saxutils.escape(post["title"])
 
         link = etree.Element('link')
         link.text = BASEURL + "/posts/" + post["postname"] + "/"
 
         desc = etree.Element('description')
-        desc.text = "i can never think of descriptions"
+        desc.text = xml.sax.saxutils.escape(getDesc(post))
 
+        # TODO: change pub date to the format required
+        # see https://stackoverflow.com/a/12271253
         pub_date = etree.Element("pubDate")
         pub_date.text = post["postdate"]
 
@@ -315,7 +332,6 @@ def generate_rss(posts, outfile):
     
     with open(outfile, 'w') as rssout:
         rssout.write(build_str)
-
 
 if __name__ == "__main__":
     # TODO, configuration

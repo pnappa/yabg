@@ -55,6 +55,12 @@ class InvalidPostError(CommentException):
 
 
 class InvalidEmailError(CommentException):
+    """
+    Thrown when provided a malformed email, not when the email is not matching the valid one.
+    We don't raise when non-matching, so as to protect the email of the user
+    We instead provide a message (on success and when it doesn't match):
+        "Please check the provided email for a delete link"
+    """
     def __init__(self):
         super().__init__(errno=4, status_code=403,
                 err_msg="invalid/missing email")
