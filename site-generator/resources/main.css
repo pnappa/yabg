@@ -14,6 +14,8 @@ article p {
 
 header a {
     color: #f60000;
+    padding: 3px 5px;
+    margin: 0px 25px;
 }
 
 header a:hover {
@@ -89,15 +91,37 @@ article header .author {
         transform: rotate(360deg);
     }
 }
+/* end spinner */
 
 #captchaloaded {
     display: none;
 }
 
-#startpostcomment {
-    display: none;
+/* a helper to show and hide objects without breaking CSP */
+.hiddenclass {
+    display: none !important;
 }
 
 #captchaid {
     display: none;
+}
+
+.highlightedcomment {
+    background-color: #00ff00;
+}
+
+#bodyinput {
+    width: 100%;
+    resize: vertical;
+}
+
+#startpostcomment {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* pad the first three equidistantly */
+#startpostcomment > input {
+    width: 30%;
 }

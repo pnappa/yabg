@@ -19,35 +19,36 @@
     <footer>
         <noscript>¡ we need js to display these comments ! <br>...yeah we use ajax and stuff to fetch and post comments</noscript>
         <section id="comments">
+            <h1>Comments</h1>
             {# clicking this will unfold the comment form, and request a captcha #}
-            <button id="composecomment">write a comment!</button>
-            <form id="startpostcomment">
-                <label for="title">Title:</label>
-                <input name="title" required>
+            <button id="composecomment">Write a comment</button>
+            <form id="startpostcomment" class="hiddenclass">
+                <!--<label for="title">Title:</label>-->
+                <input name="title" placeholder="Comment Title" required>
 
-                <label for="name">Name:</label>
-                <input name="name" required>
+                <!--<label for="name">Name:</label>-->
+                <input name="name" placeholder="Name" required>
 
-                <label for="email">Email (optional):</label>
-                <input name="email">
+                <!--<label for="email">Email (optional):</label>-->
+                <input name="email" placeholder="Email (optional)">
 
-                <label for="body">Comment:</label>
-                <input name="body" required>
+                <!--<label for="body">Comment:</label>-->
+                <textarea id="bodyinput" name="body" rows="10" placeholder="Comment" required></textarea>
 
                 <div id="captcha">
+                    <div id="incorrectcaptcha" class="hiddenclass">Incorrect answer, try again..?</div>
                     Captcha:
                     {# loading spinner #}
                     <div id="captchaspinner" class="lds-ring"><div></div><div></div><div></div><div></div></div>
                     {# when captcha question comes back from the server, this is populated #}
                     <div id="captchaloaded">
                         <div id="question"></div>
-                        <label for="captchaanswer">Answer</label>
-                        <input name="captchaanswer" required>
-                        <input type="submit" value="Submit">
+                        <!--<label for="captchaanswer">Answer</label>-->
+                        <input name="captchaanswer" placeholder="Answer" required>
+                        <input type="submit" value="Post Comment">
                     </div>
                 </div>
             </form>
-            <h1>Comments</h1>
             <a name="comments"></a>
             {# loaded comments are inserted here on the client #}
             <div id="commentbox"></div>

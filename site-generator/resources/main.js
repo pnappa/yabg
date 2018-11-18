@@ -8,16 +8,20 @@
 
 window.captchaID = null;
 window.captchaToken = null;
+window.mostRecentComment = -1;
 
 function openComment() {
     console.log("opening comment box..");
-    document.getElementById("startpostcomment").style.display = "block";
+    document.getElementById("startpostcomment").classList.remove("hiddenclass");
     loadCaptcha();
 }
 
-// get the thread id
+// get the thread id, lazily
 function getThreadID() {
-    return document.head.querySelector("[name~=postid][content]").content;
+    if (!window.threadID) {
+        window.threadID = document.head.querySelector("[name~=postid][content]").content;
+    }
+    return window.threadID;
 }
 
 function sendJSON(method, endpoint, data, callback, extraHeaders) {
@@ -66,15 +70,24 @@ function loadCaptcha() {
 
 // build the ajax request to send the captcha data back (id, and answer)
 function checkCaptcha(callback) {
+    document.getElementById("incorrectcaptcha").classList.add("hiddenclass");
 
     // TODO: somehow build error?
-    
     var data = JSON.stringify({"id": window.captchaID, "answer": document.getElementsByName("captchaanswer")[0].value});
+    document.getElementsByName("captchaanswer")[0].value = "";
     sendJSON("POST", "/captcha/" + getThreadID() + "/solve/", data, function() {
         if (this.readyState == 4 && this.status == 200) {
             console.log("received ajax response");
-            callback(JSON.parse(this.responseText));
-        } else {
+            let res = JSON.parse(this.responseText);
+            if (res["status"] == "ok") {
+                callback(JSON.parse(this.responseText));
+            } else if (res["status"] == "try again") {
+                document.getElementById("incorrectcaptcha").classList.remove("hiddenclass");
+                console.log("incorrect guess..! try again");
+            } else if (res["status"] == "restart") {
+                loadCaptcha();
+            }
+        } else if (this.readyState == 4) {
             console.log("error checking captcha?");
             console.log(this.responseText);
             // probably load new image depending on err msg number
@@ -106,6 +119,8 @@ function submitComment() {
                 console.log("received ajax response");
                 console.log(JSON.parse(this.responseText));
                 // TODO: fetch new comments and display commenting success? clear fields (potentially hide..?), etc?
+                // each new comment should be coloured because they're new 
+                loadComments();
             } else {
                 console.log("error checking captcha?");
                 console.log(this.responseText);
@@ -118,8 +133,11 @@ function submitComment() {
     return false;
 }
 
-function styleComment(name, title, body, posted) {
+function styleComment(name, title, body, posted, highlight) {
     let div = document.createElement("article");
+    if (highlight) {
+        div.classList.add("highlightedcomment");
+    }
 
     let titleEl = document.createElement("span");
     titleEl.innerText = title;
@@ -141,24 +159,35 @@ function styleComment(name, title, body, posted) {
     return div;
 }
 
-
-function loadAllComments() {
-    // TODO
-    sendJSON("GET", "/comments/" + getThreadID() + "/", null, function() {
+function loadComments() {
+    let ishighlighted = false;
+    let sinceStr = "?since=" + window.mostRecentComment;
+    if (window.mostRecentComment != -1) {
+        ishighlighted = true;
+    }
+    // TODO: fail?
+    sendJSON("GET", "/comments/" + getThreadID() + "/" + sinceStr, null, function() {
         if (this.readyState == 4 && this.status == 200) {
             console.log(JSON.parse(this.responseText));
             let comments = JSON.parse(this.responseText)["comments"];
             for (let com of comments) {
-                let commento = styleComment(com["name"], com["title"], com["body"], com["posted"]);
+                if (com["comment_id"] > window.mostRecentComment) {
+                    window.mostRecentComment = com["comment_id"];
+                }
+
+                let commento = styleComment(com["name"], com["title"], com["body"], com["posted"], ishighlighted);
                 document.getElementById("commentbox").appendChild(commento);
             }
         } 
     });
 }
 
-window.onload = loadAllComments;
+window.onload = function() { loadComments(); };
 
-document.getElementById("composecomment").onclick = () => { openComment(); };
+document.getElementById("composecomment").onclick = () => { 
+    openComment(); 
+    document.getElementById("composecomment").classList.add("hiddenclass"); 
+};
 
 document.getElementById('startpostcomment').addEventListener('submit', function(evt){
     evt.preventDefault();
