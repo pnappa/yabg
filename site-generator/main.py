@@ -204,7 +204,7 @@ def generate_post_html(post, outfile):
     info("generating post html for {}".format(post))
 
     # generate the blog post body
-    md = markdown.Markdown()
+    md = markdown.Markdown(extensions=['fenced_code'])
     with open(post["filename"], 'r') as mdIn:
         cont = "".join(mdIn.readlines())
         postbody = md.convert(cont)
@@ -248,7 +248,7 @@ def generate_chunks(posts, outdir, num_per_chunk=10):
         chunk_subset = sorted_posts[ind*num_per_chunk:(ind+1)*num_per_chunk]
 
         for i,post in enumerate(chunk_subset):
-            md = markdown.Markdown()
+            md = markdown.Markdown(extensions=['fenced_code'])
             post["content"] = md.convert(post["postbody"])
 
         template = JINJAENV.get_template('chunk.html')
@@ -336,7 +336,6 @@ def generate_rss(posts, outfile):
 if __name__ == "__main__":
     # TODO, configuration
 
-
     logging.basicConfig(level=logging.INFO)
 
     # remove previously generated files to a backup
@@ -370,5 +369,6 @@ if __name__ == "__main__":
             shutil.copy(fullfilename, './generated')
 
     # TODO: deploy script
+    
 
     

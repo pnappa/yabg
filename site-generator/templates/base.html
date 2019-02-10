@@ -9,8 +9,14 @@
         <title>pat's blog</title>
         {% endblock %}
         <!-- TODO: SRI hash integrity stuff, move to CDN? -->
-        <script src="/main.js" async></script>
-        <link rel="stylesheet" type="text/css" href="/main.css">
+        <!-- TODO: convert hash integrity to my custom jinja2 template filter -->
+        <!--<script src="/main.js" async integrity="sha384-GSuG+4VQkc/OB4muWfispwSv2cm5unlf4h1ETyXBlJTzI2/BLfO9WNEyP98smjHF"></script>-->
+        <!-- TODO: the ordering of these matter. can I do this better (async breaks it, while defer is fine. -->
+        <script src="/highlight.min.js" defer integrity="{{highlightjssum}}"></script>
+        <script src="/main.js" defer integrity="{{mainjssum}}"></script>
+        <!--<link rel="stylesheet" type="text/css" href="/main.css" integrity="sha384-yCDo0m7e9j70bEAOScgNU/xJ/0I2dGVzsKQrFldv4wRvYhT7jNEeeRc8HPrwsWOh">-->
+        <link rel="stylesheet" type="text/css" href="/main.css" integrity="{{maincsssum}}">
+        <link rel="stylesheet" type="text/css" href="/zenburn.min.css" integrity="{{zenburncsssum}}">
 
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />

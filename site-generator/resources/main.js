@@ -19,7 +19,8 @@ function openComment() {
 // get the thread id, lazily
 function getThreadID() {
     if (!window.threadID) {
-        window.threadID = document.head.querySelector("[name~=postid][content]").content;
+        let metadataEl = document.head.querySelector("[name~=postid][content]");
+        if (metadataEl) window.threadID = metadataEl.content;
     }
     return window.threadID;
 }
@@ -160,6 +161,7 @@ function styleComment(name, title, body, posted, highlight) {
 }
 
 function loadComments() {
+    if (!window.threadID) return;
     let ishighlighted = false;
     let sinceStr = "?since=" + window.mostRecentComment;
     if (window.mostRecentComment != -1) {
@@ -184,12 +186,24 @@ function loadComments() {
 
 window.onload = function() { loadComments(); };
 
-document.getElementById("composecomment").onclick = () => { 
-    openComment(); 
-    document.getElementById("composecomment").classList.add("hiddenclass"); 
-};
+let commentButton = document.getElementById("composecomment");
+if (commentButton) {
+    commentButton.onclick = () => { 
+        openComment(); 
+        document.getElementById("composecomment").classList.add("hiddenclass"); 
+    };
+}
 
-document.getElementById('startpostcomment').addEventListener('submit', function(evt){
-    evt.preventDefault();
-    submitComment();
-})
+let composeButton = document.getElementById('startpostcomment');
+if (composeButton) {
+    composeButton.addEventListener('submit', function(evt){
+        evt.preventDefault();
+        submitComment();
+    });
+}
+
+// apply syntax highlighting for code blocks (not inline comments)
+// TODO: how should inline comments be styled..?
+document.querySelectorAll('pre code').forEach((block) => {
+    hljs.highlightBlock(block);
+});
